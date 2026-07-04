@@ -1,103 +1,77 @@
-// Vercel Serverless Function — Scrape Cryptorank Drophunting page
-// Deploys automatically when pushed to Vercel
-
+// Vercel Serverless — Scrape Cryptorank for project logo, cost, status, reward type
 const https = require('https');
 
 function fetchHTML(url) {
   return new Promise((resolve, reject) => {
-    https.get(url, { headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36' } }, (res) => {
+    https.get(url, {
+      headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36' },
+      timeout: 10000
+    }, (res) => {
       let data = '';
-      res.on('data', chunk => data += chunk);
+      res.on('data', c => data += c);
       res.on('end', () => resolve(data));
-    }).on('error', reject);
+    }).on('error', reject).on('timeout', function() { this.destroy(); reject(new Error('timeout')); });
   });
-}
-
-function extractMeta(html) {
-  const result = {};
-
-  // Logo — find first large project logo
-  const logoMatch = html.match(/<img[^>]*alt="(world\.xyz|[^"]+)"[^>]*src="([^"]+)"[^>]*class[^>]*logo/i) ||
-                     html.match(/<div[^>]*(?:coin-info|logo)[^>]*>[\s\S]*?<img[^>]*src="([^"]+)"[^>]*alt="([^"]+)"/i) ||
-                     html.match(/<img[^>]*class="[^"]*logo[^"]*"[^>]*src="([^"]+)"/i) ||
-                     html.match(/<img[^>]*alt="([^"]+)"[^>]*src="([^"]+)"[^>]*\/?>\s*(?:<[^>]+>\s*)*<span[^>]*>([^<]+)<\/span>/i);
-  if (logoMatch) {
-    result.logoUrl = logoMatch[1] || logoMatch[2] || '';
-    if (result.logoUrl && !result.logoUrl.startsWith('http')) {
-      result.logoUrl = 'https://cryptorank.io' + result.logoUrl;
-    }
-  }
-
-  // Try to find logo in og:image meta
-  const ogMatch = html.match(/<meta[^>]*property="og:image"[^>]*content="([^"]+)"/i);
-  if (ogMatch && !result.logoUrl) {
-    result.logoUrl = ogMatch[1];
-  }
-
-  // Project name from title
-  const titleMatch = html.match(/<title>([^<]+?) Airdrop/i);
-  result.project = titleMatch ? titleMatch[1].trim() : '';
-
-  // Token ticker — look for it after project name in heading
-  const headingMatch = html.match(/<h1[^>]*>[\s\S]*?<span[^>]*>([A-Z0-9]{2,10})<\/span>/i) ||
-                       html.match(/<h1[^>]*>[\s\S]*?<a[^>]*>([A-Z0-9]{2,10})<\/a>/i);
-  if (headingMatch) {
-    result.token = headingMatch[1];
-  }
-
-  // Fallback: try to find token from structured JSON-LD or meta
-  if (!result.token) {
-    const tokenMatch = html.match(/"ticker"\s*:\s*"([^"]+)"/i) ||
-                       html.match(/"symbol"\s*:\s*"([^"]+)"/i);
-    if (tokenMatch) result.token = tokenMatch[1];
-  }
-
-  // Reward Type
-  const rewardMatch = html.match(/Reward\s*Type[^<]*<[^>]*>[^<]*<[^>]*>([^<]+)/i) ||
-                      html.match(/Reward\s*Type[^:]*:\s*([^<]+)</i);
-  result.rewardType = rewardMatch ? rewardMatch[1].trim() : '';
-
-  // Status
-  const statusMatch = html.match(/Status[^<]*<[^>]*>[^<]*<[^>]*>([^<]+)/i) ||
-                      html.match(/Status[^:]*:\s*([^<]+)</i);
-  result.status = statusMatch ? statusMatch[1].trim() : '';
-
-  // Reward Date
-  const dateMatch = html.match(/Reward\s*Date[^<]*<[^>]*>[^<]*<[^>]*>([^<]+)/i) ||
-                    html.match(/Reward\s*Date[^:]*:\s*([^<]+)</i);
-  result.rewardDate = dateMatch ? dateMatch[1].trim() : '';
-
-  // Time / deadline info
-  const timeMatch = html.match(/(?:Available from|Deadline|Start)[^<]*<[^>]*>([^<]+)/i);
-  if (timeMatch) {
-    result.timeInfo = timeMatch[1].trim();
-  }
-
-  return result;
 }
 
 module.exports = async (req, res) => {
   const { url } = req.query;
-
-  if (!url) {
-    return res.status(400).json({ error: 'Missing ?url= parameter' });
-  }
-
-  if (!url.includes('cryptorank.io/drophunting/')) {
-    return res.status(400).json({ error: 'URL must be a Cryptorank drophunting page' });
-  }
+  if (!url) return res.status(400).json({ error: 'Missing ?url=' });
+  if (!url.includes('cryptorank.io/drophunting/'))
+    return res.status(400).json({ error: 'Must be cryptorank.io/drophunting/...' });
 
   try {
     const html = await fetchHTML(url);
-    const data = extractMeta(html);
+    const result = {};
 
-    if (!data.project && !data.rewardType) {
-      return res.status(404).json({ error: 'Could not parse airdrop data from this page' });
+    // Title -> project name
+    const tm = html.match(/<title>([^<]+?)\s*Airdrop/i);
+    result.project = tm ? tm[1].trim() : '';
+
+    // Logo: og:image
+    const og = html.match(/<meta[^>]*property="og:image"[^>]*content="([^"]+)"/i);
+    if (og) result.logoUrl = og[1];
+
+    // Try embedded JSON data with cost
+    const jm = html.match(/"(?:key|name)":"([^"]+)"[^}]*?cost[":]+(\d+)/i);
+    if (!jm) {
+      // broader: find any "cost":N block
+      const cm = html.match(/"cost"\s*:\s*(\d+)/);
+      if (cm) result.cost = '$ ' + cm[1];
+    } else {
+      result.cost = '$ ' + jm[2];
     }
 
-    res.setHeader('Cache-Control', 's-maxage=3600, stale-while-revalidate');
-    res.json({ success: true, ...data });
+    // Reward Type
+    const rt = html.match(/Reward\s*Type[^:]*:?\s*([^<]{2,40})</i);
+    result.rewardType = rt ? rt[1].trim() : '';
+
+    // Status from info card
+    const st = html.match(/Status[^:]*:?\s*([A-Za-z]+)</i);
+    result.status = st ? st[1].trim() : '';
+    // fallback from icon alt
+    if (!result.status) {
+      const simg = html.match(/<img[^>]*alt="(Confirmed|Ended|Ongoing|Active|Upcoming)"/i);
+      if (simg) result.status = simg[1];
+    }
+
+    // Reward Date
+    const rd = html.match(/Reward\s*Date[^:]*:?\s*([^<]{2,30})</i);
+    result.rewardDate = rd ? rd[1].trim() : '';
+
+    // Raised (if no cost found)
+    if (!result.cost) {
+      const rm = html.match(/Raised[^$]*\$([^<]+)/i);
+      if (rm) result.cost = '$ ' + rm[1].trim();
+    }
+    result.cost = result.cost || 'N/A';
+
+    if (!result.project && !result.rewardType)
+      return res.status(404).json({ error: 'Could not parse airdrop data' });
+
+    res.setHeader('Cache-Control', 's-maxage=3600');
+    res.json({ success: true, ...result });
   } catch (err) {
-    res.status(500).json({ error: 'Failed to fetch: ' + err.message });
+    res.status(500).json({ error: 'Failed: ' + err.message });
   }
 };

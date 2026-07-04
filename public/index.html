@@ -3,768 +3,607 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>🪂 Airdrop Tracker</title>
+  <title>BACHY AIRDROP TRACKER</title>
   <style>
-    :root {
-      --bg: #0a0e1a;
-      --card: #131929;
-      --border: #1f2940;
-      --text: #e2e8f0;
-      --muted: #64748b;
-      --accent: #3b82f6;
-      --green: #10b981;
-      --yellow: #f59e0b;
-      --red: #ef4444;
-      --blue: #3b82f6;
-    }
+    @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap');
 
-    [data-theme="light"] {
-      --bg: #f1f5f9;
-      --card: #ffffff;
-      --border: #e2e8f0;
-      --text: #1e293b;
-      --muted: #94a3b8;
-    }
-
-    * { margin: 0; padding: 0; box-sizing: border-box; }
+    * { margin:0; padding:0; box-sizing:border-box; }
 
     body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      background: var(--bg);
-      color: var(--text);
+      background: #0f0b08;
+      color: #d4a017;
+      font-family: 'VT323', monospace;
       min-height: 100vh;
-      transition: background 0.3s, color 0.3s;
+      position: relative;
+    }
+    body::before {
+      content: '';
+      position: fixed; inset:0;
+      background: repeating-linear-gradient(0deg, rgba(0,0,0,0.15) 0px, rgba(0,0,0,0.15) 1px, transparent 1px, transparent 3px);
+      pointer-events: none; z-index: 9999;
+    }
+    body::after {
+      content: '';
+      position: fixed; inset:0;
+      background: radial-gradient(ellipse at center, transparent 60%, rgba(0,0,0,0.6) 100%);
+      pointer-events: none; z-index: 9998;
     }
 
-    .container { max-width: 1200px; margin: 0 auto; padding: 20px; }
+    .container { max-width: 1100px; margin:0 auto; padding:20px; position:relative; z-index:1; }
 
+    /* ===== HEADER ===== */
     header {
-      display: flex; justify-content: space-between; align-items: center;
-      margin-bottom: 24px; flex-wrap: wrap; gap: 12px;
+      text-align: center; margin-bottom: 28px;
+      border-bottom: 3px double #9b7b1c;
+      padding-bottom: 16px;
     }
+    h1 {
+      font-family: 'Press Start 2P', monospace;
+      font-size: 22px;
+      color: #e8b830;
+      text-shadow: 3px 3px 0 #5a3e0a, 0 0 20px #d4a01755;
+      letter-spacing: 2px;
+      word-break: break-word;
+    }
+    .subtitle {
+      font-size: 14px;
+      color: #7a6a3a;
+      margin-top: 6px;
+    }
+    .header-actions { margin-top: 14px; display:flex; gap:8px; justify-content:center; flex-wrap:wrap; }
 
-    h1 { font-size: 28px; }
-
-    .header-actions { display: flex; gap: 8px; flex-wrap: wrap; }
-
-    /* Stats */
+    /* ===== STATS ===== */
     .stats {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-      gap: 12px; margin-bottom: 24px;
+      grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+      gap: 10px; margin-bottom: 20px;
     }
     .stat-card {
-      background: var(--card); border: 1px solid var(--border);
-      border-radius: 12px; padding: 16px;
+      background: #1a120a;
+      border: 2px solid #4a3a1a;
+      padding: 12px;
+      text-align: center;
+      box-shadow: inset 0 0 15px rgba(0,0,0,0.5);
     }
-    .stat-label { font-size: 12px; color: var(--muted); text-transform: uppercase; }
-    .stat-value { font-size: 28px; font-weight: 700; margin-top: 4px; }
-    .stat-value.green { color: var(--green); }
-    .stat-value.yellow { color: var(--yellow); }
-    .stat-value.red { color: var(--red); }
-    .stat-value.blue { color: var(--blue); }
+    .stat-card .label { font-size: 11px; color: #7a6a3a; text-transform:uppercase; }
+    .stat-card .value { font-size: 28px; font-weight:bold; margin-top:2px; }
+    .stat-card .value.gold { color: #e8b830; }
+    .stat-card .value.green { color: #4caf50; }
+    .stat-card .value.yellow { color: #ffc107; }
+    .stat-card .value.blue { color: #5b9bd5; }
+    .stat-card .value.red { color: #f44336; }
 
-    /* Controls */
+    /* ===== BUTTONS ===== */
+    button {
+      font-family: 'VT323', monospace;
+      font-size: 15px;
+      padding: 8px 18px;
+      cursor: pointer;
+      border: 2px solid #9b7b1c;
+      background: #1a120a;
+      color: #d4a017;
+      transition: all 0.15s;
+      text-transform:uppercase;
+      letter-spacing:1px;
+    }
+    button:hover { background: #2a1f0e; border-color: #e8b830; color:#e8b830; text-shadow:0 0 8px #d4a01755; }
+    button:active { transform:translateY(1px); }
+    button.primary { background: #4a3a1a; border-color:#e8b830; }
+    button.primary:hover { background: #5a4a2a; }
+    button.danger { border-color:#8b3a3a; color:#c85a4a; }
+    button.danger:hover { background:#2a1a1a; border-color:#c85a4a; }
+    button.sm { padding:4px 10px; font-size:13px; }
+    button:disabled { opacity:0.4; cursor:not-allowed; }
+
+    /* ===== SEARCH ===== */
     .controls {
-      display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap;
+      display:flex; gap:8px; margin-bottom:16px; flex-wrap:wrap;
     }
     .controls input, .controls select {
-      background: var(--card); border: 1px solid var(--border);
-      color: var(--text); padding: 8px 12px; border-radius: 8px;
-      font-size: 14px;
+      font-family: 'VT323', monospace;
+      font-size: 15px;
+      background: #1a120a;
+      border: 2px solid #4a3a1a;
+      color: #d4a017;
+      padding: 8px 12px;
     }
-    .controls input { flex: 1; min-width: 200px; }
+    .controls input:focus, .controls select:focus { outline:none; border-color:#9b7b1c; }
+    .controls input { flex:1; min-width:180px; }
+    .controls select { min-width:100px; }
 
-    /* Buttons */
-    button {
-      background: var(--accent); color: white; border: none;
-      padding: 8px 16px; border-radius: 8px; cursor: pointer;
-      font-size: 14px; font-weight: 500; transition: opacity 0.2s;
-    }
-    button:hover { opacity: 0.9; }
-    button.secondary { background: var(--card); border: 1px solid var(--border); color: var(--text); }
-    button.danger { background: var(--red); }
-    button.sm { padding: 4px 10px; font-size: 12px; }
-    button.icon { padding: 4px 8px; }
-
-    /* Table */
+    /* ===== TABLE ===== */
     .table-wrap {
-      background: var(--card); border: 1px solid var(--border);
-      border-radius: 12px; overflow-x: auto;
+      border: 2px solid #4a3a1a;
+      background: #120e08;
+      overflow-x: auto;
+      box-shadow: inset 0 0 20px rgba(0,0,0,0.5);
     }
-    table { width: 100%; border-collapse: collapse; }
-    th, td { padding: 12px; text-align: left; border-bottom: 1px solid var(--border); font-size: 14px; }
-    th { color: var(--muted); font-weight: 600; font-size: 12px; text-transform: uppercase; }
-    tr:last-child td { border-bottom: none; }
-    tr:hover { background: rgba(255,255,255,0.03); }
+    table { width:100%; border-collapse:collapse; }
+    th, td {
+      padding: 10px 8px;
+      text-align: left;
+      border-bottom: 1px solid #2a1f0e;
+      font-size: 15px;
+    }
+    th {
+      color: #7a6a3a;
+      font-weight:normal;
+      text-transform:uppercase;
+      font-size: 12px;
+      letter-spacing:1px;
+      background: #1a120a;
+      border-bottom: 2px solid #4a3a1a;
+    }
+    tr:last-child td { border-bottom:none; }
+    tr:hover { background: rgba(212,160,23,0.04); }
+    .done-row td { opacity:0.35; }
+    .done-row td:first-child { opacity:1; }
 
-    /* Status badges */
+    input[type="checkbox"] {
+      width:18px; height:18px;
+      accent-color: #4caf50;
+      cursor: pointer;
+    }
+    .logo-cell img {
+      width:26px; height:26px; border-radius:50%;
+      border:2px solid #4a3a1a;
+      vertical-align:middle;
+      display:block;
+    }
+    .logo-cell { width:36px; text-align:center; }
+    .project-name { color: #e8b830; font-size:16px; }
+    .badge-cost { color: #4caf50; }
     .badge {
-      padding: 2px 8px; border-radius: 999px; font-size: 12px; font-weight: 500;
+      display:inline-block;
+      font-size:12px;
+      padding:2px 8px;
+      border:1px solid currentColor;
     }
-    .badge.claimed { background: rgba(16,185,129,0.15); color: var(--green); }
-    .badge.ongoing { background: rgba(245,158,11,0.15); color: var(--yellow); }
-    .badge.todo { background: rgba(59,130,246,0.15); color: var(--blue); }
-    .badge.missed { background: rgba(239,68,68,0.15); color: var(--red); }
+    .badge.todo { color:#5b9bd5; border-color:#3a5a8a; }
+    .badge.ongoing { color:#ffc107; border-color:#8a7a0a; }
+    .badge.claimed { color:#4caf50; border-color:#2a6a2a; }
+    .badge.missed { color:#f44336; border-color:#8a2a2a; }
+    .airdrop-link { color:#d4a017; text-decoration:none; border-bottom:1px dashed #4a3a1a; }
+    .airdrop-link:hover { color:#e8b830; border-bottom-color:#e8b830; }
 
-    .priority { font-size: 14px; }
-    .link { color: var(--accent); text-decoration: none; }
-    .link:hover { text-decoration: underline; }
+    .empty {
+      text-align:center; padding:40px; color:#5a4a2a;
+      font-size:18px;
+    }
 
-    /* Modal */
+    /* ===== MODAL (retro) ===== */
     .modal-overlay {
-      position: fixed; inset: 0; background: rgba(0,0,0,0.6);
-      display: none; align-items: center; justify-content: center; z-index: 100;
-      padding: 20px;
+      position:fixed; inset:0;
+      background: rgba(0,0,0,0.85);
+      display:none; align-items:center; justify-content:center;
+      z-index:100; padding:20px;
     }
-    .modal-overlay.active { display: flex; }
+    .modal-overlay.active { display:flex; }
     .modal {
-      background: var(--card); border: 1px solid var(--border);
-      border-radius: 16px; padding: 24px; width: 100%; max-width: 500px;
-      max-height: 90vh; overflow-y: auto;
+      background: #120e08;
+      border: 3px double #9b7b1c;
+      padding: 28px;
+      width:100%; max-width:520px;
+      max-height:90vh; overflow-y:auto;
+      box-shadow: 0 0 40px rgba(212,160,23,0.1);
     }
-    .modal h2 { margin-bottom: 16px; }
-    .form-group { margin-bottom: 12px; }
-    .form-group label { display: block; font-size: 12px; color: var(--muted); margin-bottom: 4px; }
-    .form-group input, .form-group select, .form-group textarea {
-      width: 100%; background: var(--bg); border: 1px solid var(--border);
-      color: var(--text); padding: 8px 12px; border-radius: 8px; font-size: 14px;
+    .modal h2 {
+      font-family: 'Press Start 2P', monospace;
+      font-size: 13px;
+      color: #e8b830;
+      margin-bottom: 20px;
+      line-height:1.6;
     }
-    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-    .modal-actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 16px; }
 
-    .empty { text-align: center; padding: 40px; color: var(--muted); }
+    .form-group { margin-bottom:14px; }
+    .form-group label {
+      display:block;
+      font-size:13px;
+      color:#7a6a3a;
+      text-transform:uppercase;
+      letter-spacing:1px;
+      margin-bottom:4px;
+    }
+    .form-group input, .form-group textarea {
+      width:100%;
+      font-family: 'VT323', monospace;
+      font-size:16px;
+      background: #1a120a;
+      border: 2px solid #4a3a1a;
+      color: #d4a017;
+      padding: 10px 12px;
+    }
+    .form-group input:focus { outline:none; border-color:#9b7b1c; }
+    .modal-actions { display:flex; gap:10px; justify-content:flex-end; margin-top:20px; }
 
-    /* Checkbox done */
-    .done-row td:not(:first-child) { opacity: 0.5; }
-    .done-row td:first-child { opacity: 1; }
-    input[type="checkbox"] { width: 18px; height: 18px; cursor: pointer; accent-color: var(--green); }
+    /* ===== IMPORT PREVIEW ===== */
+    .import-status { margin-top:12px; }
+    .import-loading { display:flex; align-items:center; gap:10px; padding:10px 0; color:#7a6a3a; font-size:16px; }
+    .spinner {
+      width:18px; height:18px;
+      border:2px solid #4a3a1a;
+      border-top-color:#d4a017;
+      border-radius:50%;
+      animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin { to { transform:rotate(360deg); } }
 
-    /* Import loading */
-    .import-loading { display: flex; align-items: center; gap: 8px; padding: 12px 0; color: var(--muted); }
-    .spinner { width: 18px; height: 18px; border: 2px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.8s linear infinite; }
-    @keyframes spin { to { transform: rotate(360deg); } }
-    .import-result { padding: 12px; border-radius: 8px; margin-top: 8px; font-size: 13px; }
-    .import-result.success { background: rgba(16,185,129,0.1); border: 1px solid var(--green); }
-    .import-result.error { background: rgba(239,68,68,0.1); border: 1px solid var(--red); }
-    .import-preview { display: flex; align-items: center; gap: 12px; margin-top: 8px; padding: 12px; background: var(--bg); border-radius: 8px; }
-    .import-preview img { width: 32px; height: 32px; border-radius: 50%; }
-    .import-preview div { font-size: 13px; }
-    .import-preview small { color: var(--muted); font-size: 11px; }
+    .import-preview-card {
+      display:flex; align-items:center; gap:14px;
+      padding:14px;
+      background:#1a120a;
+      border:2px solid #4a3a1a;
+      margin-top:8px;
+    }
+    .import-preview-card img {
+      width:40px; height:40px; border-radius:50%;
+      border:2px solid #4a3a1a;
+    }
+    .import-preview-card .info { font-size:16px; }
+    .import-preview-card .info .name { color:#e8b830; font-size:18px; }
+    .import-preview-card .info small { color:#7a6a3a; font-size:14px; }
+    .import-preview-card .info .detail { color:#a08030; font-size:14px; }
 
-    @media (max-width: 640px) {
-      .form-row { grid-template-columns: 1fr; }
-      th, td { font-size: 12px; padding: 8px; }
+    .import-error {
+      background:#1a0a0a; border:2px solid #8b3a3a;
+      padding:10px; color:#c85a4a; margin-top:8px;
+      font-size:15px;
+    }
+
+    .hint {
+      color:#5a4a2a; font-size:14px; margin-bottom:10px;
+      border-left:2px solid #4a3a1a; padding-left:10px;
+    }
+
+    /* ===== RESPONSIVE ===== */
+    @media (max-width:700px) {
+      h1 { font-size:16px; letter-spacing:1px; }
+      .modal h2 { font-size:11px; }
+      th, td { font-size:13px; padding:6px 4px; }
+      .project-name { font-size:14px; }
+      .stat-card .value { font-size:22px; }
     }
   </style>
 </head>
 <body>
-  <div class="container">
-    <header>
-      <h1>🪂 Airdrop Tracker</h1>
-      <div class="header-actions">
-        <button class="secondary icon" onclick="toggleTheme()" id="themeBtn">🌙</button>
-        <button class="secondary" onclick="exportCSV()">Export CSV</button>
-        <button class="secondary" onclick="exportJSON()">Backup</button>
-        <button class="secondary" onclick="document.getElementById('importFile').click()">Restore</button>
-        <input type="file" id="importFile" accept=".json" style="display:none" onchange="importJSON(event)">
-        <button onclick="openModal()">+ Tambah Airdrop</button>
-      </div>
-    </header>
+<div class="container">
 
-    <!-- Stats -->
-    <div class="stats" id="stats"></div>
+  <header>
+    <h1>BACHY AIRDROP TRACKER</h1>
+    <div class="subtitle">CRYPTORANK DROPHUNTING MONITOR</div>
+    <div class="header-actions">
+      <button onclick="toggleTheme()" id="themeBtn">☾ DARK</button>
+      <button onclick="exportCSV()">EXPORT CSV</button>
+      <button onclick="exportJSON()">BACKUP</button>
+      <button onclick="document.getElementById('importFile').click()">RESTORE</button>
+      <input type="file" id="importFile" accept=".json" style="display:none" onchange="importJSON(event)">
+      <button class="primary" onclick="openAddModal()">+ TAMBAH AIRDROP</button>
+    </div>
+  </header>
 
-    <!-- Controls -->
-    <div class="controls">
-      <input type="text" id="search" placeholder="🔍 Cari project, token, wallet..." oninput="render()">
-      <select id="filterStatus" onchange="render()">
-        <option value="">Semua Status</option>
-        <option value="claimed">✅ Sudah Klaim</option>
-        <option value="ongoing">⏳ Sedang Berjalan</option>
-        <option value="todo">📋 Belum Dikerjakan</option>
-        <option value="missed">❌ Expired/Missed</option>
-      </select>
-      <select id="filterPriority" onchange="render()">
-        <option value="">Semua Prioritas</option>
-        <option value="3">⭐⭐⭐ Tinggi</option>
-        <option value="2">⭐⭐ Sedang</option>
-        <option value="1">⭐ Rendah</option>
-      </select>
-      <select id="sortBy" onchange="render()">
-        <option value="created">Sort: Terbaru</option>
-        <option value="deadline">Sort: Deadline</option>
-        <option value="project">Sort: Nama Project</option>
-        <option value="value">Sort: Nilai (USD)</option>
-      </select>
-    </div>
+  <!-- STATS -->
+  <div class="stats" id="stats"></div>
 
-    <!-- Table -->
-    <div class="table-wrap">
-      <table>
-        <thead>
-          <tr>
-            <th style="width:40px">✅</th>
-            <th style="width:36px">🖼</th>
-            <th>Project</th>
-            <th>Token</th>
-            <th>Status</th>
-            <th>Reward Type</th>
-            <th>Reward Date</th>
-            <th>Wallet</th>
-            <th>Jumlah</th>
-            <th>Nilai</th>
-            <th>Deadline</th>
-            <th>Link</th>
-            <th>Prioritas</th>
-            <th>Catatan</th>
-            <th>Aksi</th>
-          </tr>
-        </thead>
-        <tbody id="tableBody"></tbody>
-      </table>
-    </div>
-    <div class="empty" id="empty" style="display:none">
-      Belum ada airdrop. Klik "+ Tambah Airdrop" untuk mulai tracking.
-    </div>
+  <!-- CONTROLS -->
+  <div class="controls">
+    <input type="text" id="search" placeholder="CARI PROJECT..." oninput="render()">
+    <select id="filterStatus" onchange="render()">
+      <option value="">SEMUA</option>
+      <option value="todo">TODO</option>
+      <option value="ongoing">BERJALAN</option>
+      <option value="claimed">CLAIMED</option>
+      <option value="missed">MISSED</option>
+    </select>
+    <select id="sortBy" onchange="render()">
+      <option value="created">TERBARU</option>
+      <option value="project">PROJECT</option>
+      <option value="cost">COST</option>
+    </select>
   </div>
 
-  <!-- Import Modal -->
-  <div class="modal-overlay" id="importModal">
-    <div class="modal" style="max-width:520px">
-      <h2>🔗 Import dari Cryptorank</h2>
-      <p style="color:var(--muted);font-size:13px;margin-bottom:12px">Tempel link dari Cryptorank Drophunting, data akan otomatis terisi.</p>
-      <div class="form-group">
-        <label>URL Cryptorank Drophunting</label>
-        <input type="url" id="importUrl" placeholder="https://cryptorank.io/drophunting/world-xyz-activity1230" onkeydown="if(event.key==='Enter')importFromURL()">
-      </div>
-      <div id="importStatus"></div>
-      <div class="modal-actions">
-        <button class="secondary" onclick="closeImportModal()">Batal</button>
-        <button onclick="importFromURL()" id="importBtn">🔍 Ambil Data</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- Add/Edit Modal -->
-  <div class="modal-overlay" id="modal">
-    <div class="modal">
-      <h2 id="modalTitle">Tambah Airdrop</h2>
-      <input type="hidden" id="editId">
-      <div class="form-group">
-        <label>Nama Project *</label>
-        <div style="display:flex;gap:8px">
-          <input type="text" id="fProject" placeholder="Contoh: Arbitrum, zkSync, LayerZero" style="flex:1">
-          <button type="button" class="secondary" onclick="openImportModal()" title="Import dari Cryptorank">🔗</button>
-        </div>
-      </div>
-      <div class="form-row">
-        <div class="form-group">
-          <label>Token / Ticker</label>
-          <input type="text" id="fToken" placeholder="Contoh: ARB, ZK, ZRO">
-        </div>
-        <div class="form-group">
-          <label>Status *</label>
-          <select id="fStatus">
-            <option value="todo">📋 Belum Dikerjakan</option>
-            <option value="ongoing">⏳ Sedang Berjalan</option>
-            <option value="claimed">✅ Sudah Klaim</option>
-            <option value="missed">❌ Expired/Missed</option>
-          </select>
-        </div>
-      </div>
-      <div class="form-row">
-        <div class="form-group">
-          <label>Reward Type</label>
-          <input type="text" id="fRewardType" placeholder="Contoh: Airdrop, Whitelist, Testnet" readonly style="background:var(--border);color:var(--muted)">
-        </div>
-        <div class="form-group">
-          <label>Reward Date</label>
-          <input type="text" id="fRewardDate" placeholder="TBA / Tanggal" readonly style="background:var(--border);color:var(--muted)">
-        </div>
-      </div>
-      <div class="form-row">
-        <div class="form-group">
-          <label>Wallet (Label)</label>
-          <input type="text" id="fWallet" placeholder="Contoh: Metamask A, Backpack, Leap">
-        </div>
-        <div class="form-group">
-          <label>Prioritas</label>
-          <select id="fPriority">
-            <option value="3">⭐⭐⭐ Tinggi</option>
-            <option value="2">⭐⭐ Sedang</option>
-            <option value="1">⭐ Rendah</option>
-          </select>
-        </div>
-      </div>
-      <div class="form-row">
-        <div class="form-group">
-          <label>Jumlah Token</label>
-          <input type="number" id="fAmount" placeholder="0" step="any">
-        </div>
-        <div class="form-group">
-          <label>Nilai (USD)</label>
-          <input type="number" id="fValue" placeholder="0" step="any">
-        </div>
-      </div>
-      <div class="form-row">
-        <div class="form-group">
-          <label>Tanggal Daftar</label>
-          <input type="date" id="fDateRegistered">
-        </div>
-        <div class="form-group">
-          <label>Tanggal Klaim</label>
-          <input type="date" id="fDateClaimed">
-        </div>
-      </div>
-      <div class="form-group">
-        <label>Deadline</label>
-        <input type="date" id="fDeadline">
-      </div>
-      <div class="form-group">
-        <label>Link</label>
-        <input type="url" id="fLink" placeholder="https://...">
-      </div>
-      <div class="form-group">
-        <label>Syarat / Cara Klaim</label>
-        <input type="text" id="fRequirements" placeholder="Contoh: Bridge 5x, Swap, dll">
-      </div>
-      <div class="form-group">
-        <label>Catatan</label>
-        <textarea id="fNotes" rows="2" placeholder="Catatan tambahan..."></textarea>
-      </div>
-      <div class="modal-actions">
-        <button class="secondary" onclick="closeModal()">Batal</button>
-        <button onclick="saveAirdrop()">Simpan</button>
-      </div>
-    </div>
-  </div>
-
-  <script>
-    const STORAGE_KEY = 'airdrop_tracker_data';
-    let airdrops = [];
-    let editId = null;
-
-    // ===== Done Tracking (24h Auto-Reset) =====
-    const DONE_KEY = 'airdrop_done_tracker';
-    function getDoneMap() {
-      return JSON.parse(localStorage.getItem(DONE_KEY) || '{}');
-    }
-    function saveDoneMap(map) {
-      localStorage.setItem(DONE_KEY, JSON.stringify(map));
-    }
-    function isDoneRecent(id) {
-      const map = getDoneMap();
-      const ts = map[id];
-      if (!ts) return false;
-      return (Date.now() - ts) < 24 * 60 * 60 * 1000;
-    }
-    function getResetTime(id) {
-      const map = getDoneMap();
-      const ts = map[id];
-      if (!ts) return '';
-      const remain = 24 * 60 * 60 * 1000 - (Date.now() - ts);
-      if (remain <= 0) return 'sekarang';
-      const h = Math.floor(remain / 3600000);
-      const m = Math.floor((remain % 3600000) / 60000);
-      return `${h}j ${m}m lagi`;
-    }
-    function toggleDone(id, checked) {
-      const map = getDoneMap();
-      if (checked) {
-        map[id] = Date.now();
-      } else {
-        delete map[id];
-      }
-      saveDoneMap(map);
-      render();
-    }
-
-    // ===== Import dari Cryptorank =====
-    function openImportModal() {
-      document.getElementById('importUrl').value = '';
-      document.getElementById('importStatus').innerHTML = '';
-      document.getElementById('importModal').classList.add('active');
-    }
-    function closeImportModal() {
-      document.getElementById('importModal').classList.remove('active');
-    }
-    async function importFromURL() {
-      const url = document.getElementById('importUrl').value.trim();
-      if (!url) { alert('Masukkan URL Cryptorank terlebih dahulu'); return; }
-      if (!url.includes('cryptorank.io/drophunting/')) { alert('URL harus dari Cryptorank Drophunting'); return; }
-
-      const statusEl = document.getElementById('importStatus');
-      const btn = document.getElementById('importBtn');
-      btn.disabled = true;
-      statusEl.innerHTML = '<div class="import-loading"><div class="spinner"></div>Mengambil data...</div>';
-
-      try {
-        // Try the Vercel API first, fallback to direct fetch
-        const apiUrl = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
-          ? '/api/scrape?url=' + encodeURIComponent(url)
-          : '/api/scrape?url=' + encodeURIComponent(url);
-
-        let data;
-        try {
-          const res = await fetch(apiUrl);
-          data = await res.json();
-          if (!res.ok) throw new Error(data.error || 'Gagal mengambil data');
-        } catch(fetchErr) {
-          // Fallback: try direct CORS proxy
-          const proxyRes = await fetch(`https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`);
-          const html = await proxyRes.text();
-          data = parseFromHTML(html);
-        }
-
-        if (!data.project && !data.rewardType) {
-          throw new Error('Tidak bisa membaca data dari halaman ini');
-        }
-
-        statusEl.innerHTML = `
-          <div class="import-result success">
-            ✅ Data ditemukan!
-            <div class="import-preview">
-              ${data.logoUrl ? `<img src="${esc(data.logoUrl)}" alt="">` : '<span style="font-size:24px">🪂</span>'}
-              <div>
-                <strong>${esc(data.project)}</strong> ${data.token ? `(${esc(data.token)})` : ''}<br>
-                <small>${esc(data.rewardType || '')} · ${esc(data.status || '')} · ${esc(data.rewardDate || 'TBA')}</small>
-              </div>
-            </div>
-          </div>
-          <div style="margin-top:8px;text-align:right">
-            <button onclick="applyImportData()">✅ Gunakan Data Ini</button>
-          </div>
-        `;
-
-        // Store for applyImportData
-        window._importData = data;
-
-      } catch(err) {
-        statusEl.innerHTML = `<div class="import-result error">❌ ${esc(err.message)}. Silakan isi manual.</div>`;
-      } finally {
-        btn.disabled = false;
-      }
-    }
-
-    function applyImportData() {
-      const d = window._importData;
-      if (!d) return;
-      document.getElementById('fProject').value = d.project || '';
-      document.getElementById('fToken').value = d.token || '';
-      document.getElementById('fRewardType').value = d.rewardType || '';
-      document.getElementById('fRewardDate').value = d.rewardDate || '';
-      document.getElementById('fLink').value = document.getElementById('importUrl').value.trim();
-      document.getElementById('fStatus').value = d.status?.toLowerCase().includes('confirm') ? 'ongoing' : 'todo';
-      document.getElementById('fPriority').value = '2';
-
-      // Store logo URL for use when saving
-      window._pendingLogoUrl = d.logoUrl || '';
-
-      closeImportModal();
-      document.getElementById('modalTitle').textContent = 'Tambah Airdrop (dari Cryptorank)';
-    }
-
-    function parseFromHTML(html) {
-      const result = {};
-      const extract = (pattern, group=1) => { const m = html.match(pattern); return m ? m[group].trim() : '' };
-
-      // Title
-      const titleM = html.match(/<title>([^<]+?)\s*Airdrop/i);
-      result.project = titleM ? titleM[1].trim() : '';
-
-      // Logo
-      const logoM = html.match(/<img[^>]*class="[^"]*logo[^"]*"[^>]*src="([^"]+)"/i) ||
-                    html.match(/<meta[^>]*property="og:image"[^>]*content="([^"]+)"/i);
-      result.logoUrl = logoM ? (logoM[1].startsWith('http') ? logoM[1] : 'https://cryptorank.io' + logoM[1]) : '';
-
-      // Scrape text-based fields from the HTML body
-      result.token = extract(/ticker["'\s:]+([A-Z0-9]{2,10})/i);
-      if (!result.token) {
-        const tokenM = html.match(/"symbol"\s*:\s*"([A-Z0-9]+)"/i) ||
-                       html.match(/[>]([A-Z0-9]{2,8})[<]\/(?:span|a|strong|b)[^>]*>[^<]*Reward\s*Type/i);
-        if (tokenM) result.token = tokenM[1];
-      }
-
-      result.rewardType = extract(/Reward\s*Type[^:]*:?\s*([^<]{2,50})</i);
-      result.status = extract(/Status[^:]*:?\s*([^<]{2,30})</i);
-      result.rewardDate = extract(/Reward\s*Date[^:]*:?\s*([^<]{2,30})</i);
-
-      return result;
-    }
-    function loadData() {
-      const data = localStorage.getItem(STORAGE_KEY);
-      airdrops = data ? JSON.parse(data) : [];
-    }
-    function saveData() {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(airdrops));
-    }
-
-    // ===== Theme =====
-    function toggleTheme() {
-      const current = document.documentElement.getAttribute('data-theme') || 'dark';
-      const next = current === 'dark' ? 'light' : 'dark';
-      document.documentElement.setAttribute('data-theme', next);
-      localStorage.setItem('airdrop_theme', next);
-      document.getElementById('themeBtn').textContent = next === 'dark' ? '🌙' : '☀️';
-    }
-    (function() {
-      const theme = localStorage.getItem('airdrop_theme') || 'dark';
-      document.documentElement.setAttribute('data-theme', theme);
-      document.getElementById('themeBtn').textContent = theme === 'dark' ? '🌙' : '☀️';
-    })();
-
-    // ===== Stats =====
-    function renderStats() {
-      const stats = {
-        claimed: airdrops.filter(a => a.status === 'claimed').length,
-        ongoing: airdrops.filter(a => a.status === 'ongoing').length,
-        todo: airdrops.filter(a => a.status === 'todo').length,
-        missed: airdrops.filter(a => a.status === 'missed').length,
-      };
-      const totalValue = airdrops
-        .filter(a => a.status === 'claimed')
-        .reduce((sum, a) => sum + (parseFloat(a.value) || 0), 0);
-
-      document.getElementById('stats').innerHTML = `
-        <div class="stat-card">
-          <div class="stat-label">✅ Sudah Klaim</div>
-          <div class="stat-value green">${stats.claimed}</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-label">⏳ Sedang Berjalan</div>
-          <div class="stat-value yellow">${stats.ongoing}</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-label">📋 Belum Dikerjakan</div>
-          <div class="stat-value blue">${stats.todo}</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-label">❌ Missed</div>
-          <div class="stat-value red">${stats.missed}</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-label">💰 Total Nilai Klaim</div>
-          <div class="stat-value green">$${totalValue.toFixed(2)}</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-label">📊 Total Airdrop</div>
-          <div class="stat-value">${airdrops.length}</div>
-        </div>
-      `;
-    }
-
-    // ===== Render Table =====
-    function render() {
-      const search = document.getElementById('search').value.toLowerCase();
-      const filterStatus = document.getElementById('filterStatus').value;
-      const filterPriority = document.getElementById('filterPriority').value;
-      const sortBy = document.getElementById('sortBy').value;
-
-      let filtered = airdrops.filter(a => {
-        if (filterStatus && a.status !== filterStatus) return false;
-        if (filterPriority && a.priority !== parseInt(filterPriority)) return false;
-        if (search) {
-          const text = (a.project + ' ' + a.token + ' ' + a.wallet + ' ' + (a.notes||'')).toLowerCase();
-          if (!text.includes(search)) return false;
-        }
-        return true;
-      });
-
-      // Sort
-      filtered.sort((a, b) => {
-        switch(sortBy) {
-          case 'deadline':
-            return (a.deadline || '9999').localeCompare(b.deadline || '9999');
-          case 'project':
-            return (a.project||'').localeCompare(b.project||'');
-          case 'value':
-            return (parseFloat(b.value)||0) - (parseFloat(a.value)||0);
-          default:
-            return b.createdAt - a.createdAt;
-        }
-      });
-
-      const statusMap = {
-        claimed: { label: '✅ Sudah Klaim', class: 'claimed' },
-        ongoing: { label: '⏳ Berjalan', class: 'ongoing' },
-        todo: { label: '📋 Todo', class: 'todo' },
-        missed: { label: '❌ Missed', class: 'missed' },
-      };
-
-      const priorityMap = { 3:'⭐⭐⭐', 2:'⭐⭐', 1:'⭐' };
-
-      const tbody = document.getElementById('tableBody');
-      tbody.innerHTML = filtered.map(a => `
-        <tr class="${isDoneRecent(a.id) ? 'done-row' : ''}">
-          <td style="text-align:center"><input type="checkbox" ${isDoneRecent(a.id)?'checked':''} onchange="toggleDone('${a.id}', this.checked)" title="${isDoneRecent(a.id) ? 'Otomatis reset ' + getResetTime(a.id) : 'Tandai selesai'}"></td>
-          <td>${a.logoUrl ? `<img src="${esc(a.logoUrl)}" alt="" style="width:24px;height:24px;border-radius:50%;vertical-align:middle">` : '🪂'}</td>
-          <td><strong>${esc(a.project)}</strong></td>
-          <td>${esc(a.token) || '-'}</td>
-          <td><span class="badge ${statusMap[a.status].class}">${statusMap[a.status].label}</span></td>
-          <td>${esc(a.rewardType) || '-'}</td>
-          <td>${esc(a.rewardDate) || '-'}</td>
-          <td>${esc(a.wallet) || '-'}</td>
-          <td>${a.amount || '-'}</td>
-          <td>${a.value ? '$' + parseFloat(a.value).toFixed(2) : '-'}</td>
-          <td>${a.deadline || '-'}</td>
-          <td>${a.link ? `<a href="${esc(a.link)}" target="_blank" class="link">Link</a>` : '-'}</td>
-          <td class="priority">${priorityMap[a.priority] || '-'}</td>
-          <td>${esc(a.notes) || '-'}</td>
-          <td style="white-space:nowrap">
-            <button class="secondary sm" onclick="editAirdrop('${a.id}')">Edit</button>
-            <button class="danger sm" onclick="deleteAirdrop('${a.id}')">Hapus</button>
-          </td>
+  <!-- TABLE -->
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th style="width:36px"></th>
+          <th style="width:40px">LOGO</th>
+          <th>PROJECT</th>
+          <th>COST</th>
+          <th>STATUS</th>
+          <th>REWARD DATE</th>
+          <th>AIRDROP LINK</th>
+          <th>AKSI</th>
         </tr>
-      `).join('');
+      </thead>
+      <tbody id="tableBody"></tbody>
+    </table>
+  </div>
+  <div class="empty" id="empty">BELUM ADA AIRDROP. KLIK "+ TAMBAH AIRDROP"</div>
 
-      document.getElementById('empty').style.display = filtered.length === 0 ? 'block' : 'none';
-      renderStats();
+  <!-- ==================== ADD MODAL ==================== -->
+  <div class="modal-overlay" id="addModal">
+    <div class="modal">
+      <h2>+ TAMBAH AIRDROP</h2>
+
+      <div class="form-group">
+        <label>🔗 LINK INFO AIRDROP (CRYPTORANK)</label>
+        <input type="url" id="cryptorankUrl" placeholder="https://cryptorank.io/drophunting/..." onchange="fetchFromCR()" onpaste="setTimeout(fetchFromCR,100)">
+        <div style="margin-top:6px"><button type="button" class="sm" onclick="fetchFromCR()">⟳ AMBIL DATA</button></div>
+      </div>
+
+      <!-- Import Status / Preview -->
+      <div id="importStatus"></div>
+
+      <div class="form-group" style="margin-top:14px">
+        <label>🔗 LINK AIRDROP YANG AKAN DIKERJAKAN</label>
+        <input type="url" id="airdropTaskLink" placeholder="https://..." value="">
+      </div>
+
+      <div class="form-group" style="margin-top:6px">
+        <label>STATUS</label>
+        <select id="fStatus" style="width:100%;font-family:'VT323',monospace;font-size:16px;background:#1a120a;border:2px solid #4a3a1a;color:#d4a017;padding:10px 12px;">
+          <option value="todo">📋 TODO</option>
+          <option value="ongoing">⏳ BERJALAN</option>
+          <option value="claimed">✅ CLAIMED</option>
+          <option value="missed">❌ MISSED</option>
+        </select>
+      </div>
+
+      <input type="hidden" id="fProject">
+      <input type="hidden" id="fLogoUrl">
+      <input type="hidden" id="fCost">
+      <input type="hidden" id="fRewardDate">
+      <input type="hidden" id="editId">
+
+      <div class="modal-actions">
+        <button onclick="closeAddModal()">BATAL</button>
+        <button class="primary" onclick="saveAirdrop()">SIMPAN</button>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+const SK = 'bachy_airdrop_data';
+const DK = 'bachy_done_map';
+let airdrops = [];
+
+// ===== STORAGE =====
+function load() { airdrops = JSON.parse(localStorage.getItem(SK) || '[]'); }
+function save() { localStorage.setItem(SK, JSON.stringify(airdrops)); }
+
+// ===== DONE 24H =====
+function getDone() { return JSON.parse(localStorage.getItem(DK) || '{}'); }
+function saveDone(m) { localStorage.setItem(DK, JSON.stringify(m)); }
+function isDone(id) {
+  const m = getDone(), t = m[id];
+  return t && (Date.now()-t) < 86400000;
+}
+function toggleDone(id, chk) {
+  const m = getDone();
+  chk ? m[id]=Date.now() : delete m[id];
+  saveDone(m); render();
+}
+
+// ===== THEME =====
+function toggleTheme() {
+  const b = document.body;
+  const t = b.getAttribute('data-theme')==='light'?'dark':'light';
+  b.setAttribute('data-theme',t);
+  localStorage.setItem('bachy_theme',t);
+  document.getElementById('themeBtn').textContent = t==='light'?'☀ LIGHT':'☾ DARK';
+}
+(function() {
+  const t = localStorage.getItem('bachy_theme');
+  if (t) document.body.setAttribute('data-theme',t);
+})();
+
+// ===== RENDER =====
+function render() {
+  const q = document.getElementById('search').value.toLowerCase();
+  const fs = document.getElementById('filterStatus').value;
+  const sb = document.getElementById('sortBy').value;
+
+  let f = airdrops.filter(a => {
+    if (fs && a.status!==fs) return false;
+    if (q) return (a.project+'').toLowerCase().includes(q);
+    return true;
+  });
+
+  f.sort((a,b) => {
+    if (sb==='project') return (a.project||'').localeCompare(b.project||'');
+    if (sb==='cost') return (parseInt((a.cost||'').replace(/[^0-9]/g,''))||999) - (parseInt((b.cost||'').replace(/[^0-9]/g,''))||999);
+    return b.createdAt - a.createdAt;
+  });
+
+  // Stats
+  const st = {
+    todo: airdrops.filter(x=>x.status==='todo').length,
+    ongoing: airdrops.filter(x=>x.status==='ongoing').length,
+    claimed: airdrops.filter(x=>x.status==='claimed').length,
+    missed: airdrops.filter(x=>x.status==='missed').length
+  };
+  document.getElementById('stats').innerHTML = `
+    <div class="stat-card"><div class="label">TOTAL</div><div class="value gold">${airdrops.length}</div></div>
+    <div class="stat-card"><div class="label">TODO</div><div class="value blue">${st.todo}</div></div>
+    <div class="stat-card"><div class="label">BERJALAN</div><div class="value yellow">${st.ongoing}</div></div>
+    <div class="stat-card"><div class="label">CLAIMED</div><div class="value green">${st.claimed}</div></div>
+    <div class="stat-card"><div class="label">MISSED</div><div class="value red">${st.missed}</div></div>
+  `;
+
+  const sm = { todo:'todo', ongoing:'ongoing', claimed:'claimed', missed:'missed' };
+  const tbody = document.getElementById('tableBody');
+  tbody.innerHTML = f.map(a => {
+    const done = isDone(a.id);
+    const statusBadge = {
+      todo:'<span class="badge todo">TODO</span>',
+      ongoing:'<span class="badge ongoing">BERJALAN</span>',
+      claimed:'<span class="badge claimed">CLAIMED</span>',
+      missed:'<span class="badge missed">MISSED</span>'
+    }[a.status]||'';
+    return `<tr class="${done?'done-row':''}">
+      <td style="text-align:center"><input type="checkbox" ${done?'checked':''} onchange="toggleDone('${a.id}',this.checked)"></td>
+      <td class="logo-cell">${a.logoUrl ? `<img src="${esc(a.logoUrl)}" alt="">` : '🪂'}</td>
+      <td><span class="project-name">${esc(a.project)}</span></td>
+      <td class="badge-cost">${esc(a.cost)||'-'}</td>
+      <td>${statusBadge}</td>
+      <td style="color:#7a6a3a">${esc(a.rewardDate)||'-'}</td>
+      <td>${a.airdropLink ? `<a href="${esc(a.airdropLink)}" target="_blank" class="airdrop-link">→ BUKA</a>` : '-'}</td>
+      <td><button class="sm" onclick="editAirdrop('${a.id}')">EDIT</button> <button class="sm danger" onclick="deleteAirdrop('${a.id}')">HAPUS</button></td>
+    </tr>`;
+  }).join('');
+  document.getElementById('empty').style.display = f.length===0?'block':'none';
+}
+
+function esc(s) { return (s||'').replace(/[<>&"]/g,c=>({'<':'<,'>':'>','&':'&','"':'"'}[c])); }
+
+// ===== MODAL =====
+function openAddModal() {
+  document.getElementById('editId').value = '';
+  document.getElementById('cryptorankUrl').value = '';
+  document.getElementById('airdropTaskLink').value = '';
+  document.getElementById('importStatus').innerHTML = '';
+  document.getElementById('fStatus').value = 'todo';
+  document.getElementById('addModal').classList.add('active');
+  document.getElementById('addModal').querySelector('h2').textContent = '+ TAMBAH AIRDROP';
+}
+
+function closeAddModal() { document.getElementById('addModal').classList.remove('active'); }
+
+function editAirdrop(id) {
+  const a = airdrops.find(x => x.id === id);
+  if (!a) return;
+  document.getElementById('editId').value = id;
+  document.getElementById('cryptorankUrl').value = a.cryptorankUrl || '';
+  document.getElementById('airdropTaskLink').value = a.airdropLink || '';
+  document.getElementById('fStatus').value = a.status || 'todo';
+  document.getElementById('importStatus').innerHTML = a.logoUrl
+    ? `<div class="import-preview-card">
+        ${a.logoUrl ? `<img src="${esc(a.logoUrl)}" alt="">` : ''}
+        <div class="info">
+          <div class="name">${esc(a.project)}</div>
+          <div class="detail">COST: ${esc(a.cost||'-')} · ${esc(a.rewardDate||'-')}</div>
+        </div>
+      </div>`
+    : '';
+  document.getElementById('addModal').classList.add('active');
+  document.getElementById('addModal').querySelector('h2').textContent = '✎ EDIT AIRDROP';
+}
+
+function deleteAirdrop(id) {
+  if (!confirm('HAPUS AIRDROP INI?')) return;
+  airdrops = airdrops.filter(a => a.id !== id);
+  save(); render();
+}
+
+// ===== CRYPTORANK FETCH =====
+async function fetchFromCR() {
+  const url = document.getElementById('cryptorankUrl').value.trim();
+  const stEl = document.getElementById('importStatus');
+  if (!url || !url.includes('cryptorank.io/drophunting/')) {
+    stEl.innerHTML = '<div class="import-error">MASUKKAN LINK CRYPTORANK DROPHUNTING YANG VALID</div>';
+    return;
+  }
+  stEl.innerHTML = '<div class="import-loading"><div class="spinner"></div> MENGAMBIL DATA...</div>';
+  try {
+    const api = '/api/scrape?url=' + encodeURIComponent(url);
+    let res = await fetch(api);
+    let data = await res.json();
+    if (!res.ok) throw new Error(data.error);
+    if (!data.project && !data.rewardType) throw new Error('TIDAK DAPAT MEMBACA DATA');
+
+    stEl.innerHTML = `<div class="import-preview-card">
+      ${data.logoUrl ? `<img src="${esc(data.logoUrl)}" alt="">` : ''}
+      <div class="info">
+        <div class="name">${esc(data.project)}</div>
+        <small>${esc(data.rewardType||'')}</small>
+        <div class="detail">COST: ${esc(data.cost||'N/A')} · STATUS: ${esc(data.status||'-')} · DATE: ${esc(data.rewardDate||'TBA')}</div>
+      </div>
+    </div>`;
+
+    document.getElementById('fProject').value = data.project || '';
+    document.getElementById('fLogoUrl').value = data.logoUrl || '';
+    document.getElementById('fCost').value = data.cost || 'N/A';
+    document.getElementById('fRewardDate').value = data.rewardDate || '';
+    if (data.status && (data.status.toLowerCase().includes('confirm') || data.status.toLowerCase().includes('on')))
+      document.getElementById('fStatus').value = 'ongoing';
+
+  } catch(e) {
+    stEl.innerHTML = `<div class="import-error">❌ ${esc(e.message)}. ISI MANUAL.</div>`;
+  }
+}
+
+// ===== SAVE =====
+function saveAirdrop() {
+  const cryptorankUrl = document.getElementById('cryptorankUrl').value.trim();
+  const airdropLink = document.getElementById('airdropTaskLink').value.trim();
+  const status = document.getElementById('fStatus').value;
+  const editId = document.getElementById('editId').value;
+
+  if (!cryptorankUrl) { alert('LINK CRYPTORANK WAJIB DIISI'); return; }
+
+  const data = {
+    id: editId || ('a'+Date.now()+Math.random().toString(36).slice(2,6)),
+    project: document.getElementById('fProject').value || cryptorankUrl.match(/drophunting\/([^\/\?-]+)/i)?.[1] || 'UNKNOWN',
+    logoUrl: document.getElementById('fLogoUrl').value,
+    cost: document.getElementById('fCost').value,
+    rewardDate: document.getElementById('fRewardDate').value,
+    cryptorankUrl,
+    airdropLink,
+    status: status || 'todo',
+    createdAt: editId ? (airdrops.find(x=>x.id===editId)?.createdAt||Date.now()) : Date.now()
+  };
+
+  if (editId) {
+    const idx = airdrops.findIndex(x => x.id === editId);
+    if (idx>=0) airdrops[idx] = data;
+  } else {
+    // check duplicate
+    if (airdrops.some(x => x.cryptorankUrl === cryptorankUrl)) {
+      if (!confirm('AIRDROP INI SUDAH ADA. TAMBAHKAN DUPLIKAT?')) return;
     }
+    airdrops.push(data);
+  }
+  save(); render(); closeAddModal();
+}
 
-    function esc(s) { return (s||'').replace(/[<>&"]/g, c=>({'<':'<','>':'>','&':'&','"':'"'}[c])); }
+// ===== EXPORT / IMPORT =====
+function exportJSON() {
+  const b = new Blob([JSON.stringify(airdrops,null,2)],{type:'application/json'});
+  const u = URL.createObjectURL(b);
+  const a = document.createElement('a');
+  a.href=u; a.download='bachy_airdrop_'+new Date().toISOString().slice(0,10)+'.json'; a.click();
+  URL.revokeObjectURL(u);
+}
+function importJSON(e) {
+  const f = e.target.files[0]; if(!f) return;
+  const r = new FileReader();
+  r.onload = (ev) => {
+    try {
+      const d = JSON.parse(ev.target.result);
+      if (confirm('RESTORE '+d.length+' AIRDROP?')) { airdrops = d; save(); render(); }
+    } catch(err) { alert('FILE INVALID: '+err.message); }
+  };
+  r.readAsText(f);
+}
+function exportCSV() {
+  if (!airdrops.length) { alert('TIDAK ADA DATA'); return; }
+  const h = ['Project','Cost','Status','RewardDate','AirdropLink','CryptorankUrl'];
+  const rows = airdrops.map(a => [a.project, a.cost, a.status, a.rewardDate, a.airdropLink, a.cryptorankUrl]
+    .map(v => '"'+(v||'').replace(/"/g,'""')+'"').join(','));
+  const csv = h.join(',')+'\n'+rows.join('\n');
+  const b = new Blob([csv],{type:'text/csv'});
+  const u = URL.createObjectURL(b);
+  const a = document.createElement('a');
+  a.href=u; a.download='bachy_airdrop_'+new Date().toISOString().slice(0,10)+'.csv'; a.click();
+  URL.revokeObjectURL(u);
+}
 
-    // ===== Modal =====
-    function openModal(id) {
-      editId = id || null;
-      document.getElementById('modalTitle').textContent = id ? 'Edit Airdrop' : 'Tambah Airdrop';
-      document.getElementById('editId').value = id || '';
-
-      if (id) {
-        const a = airdrops.find(x => x.id === id);
-        if (a) {
-          document.getElementById('fProject').value = a.project || '';
-          document.getElementById('fToken').value = a.token || '';
-          document.getElementById('fRewardType').value = a.rewardType || '';
-          document.getElementById('fRewardDate').value = a.rewardDate || '';
-          document.getElementById('fStatus').value = a.status || 'todo';
-          document.getElementById('fWallet').value = a.wallet || '';
-          document.getElementById('fPriority').value = a.priority || 2;
-          document.getElementById('fAmount').value = a.amount || '';
-          document.getElementById('fValue').value = a.value || '';
-          document.getElementById('fDateRegistered').value = a.dateRegistered || '';
-          document.getElementById('fDateClaimed').value = a.dateClaimed || '';
-          document.getElementById('fDeadline').value = a.deadline || '';
-          document.getElementById('fLink').value = a.link || '';
-          document.getElementById('fRequirements').value = a.requirements || '';
-          document.getElementById('fNotes').value = a.notes || '';
-        }
-      } else {
-        document.querySelectorAll('.modal input, .modal select, .modal textarea').forEach(el => el.value = '');
-        document.getElementById('fStatus').value = 'todo';
-        document.getElementById('fPriority').value = '2';
-      }
-      document.getElementById('modal').classList.add('active');
-    }
-    function closeModal() {
-      document.getElementById('modal').classList.remove('active');
-    }
-
-    function saveAirdrop() {
-      const project = document.getElementById('fProject').value.trim();
-      if (!project) { alert('Nama project wajib diisi'); return; }
-
-      const data = {
-        id: editId || ('a' + Date.now() + Math.random().toString(36).slice(2,7)),
-        project,
-        token: document.getElementById('fToken').value.trim(),
-        rewardType: document.getElementById('fRewardType').value.trim(),
-        rewardDate: document.getElementById('fRewardDate').value.trim(),
-        logoUrl: window._pendingLogoUrl || (editId ? airdrops.find(a=>a.id===editId)?.logoUrl || '' : ''),
-        status: document.getElementById('fStatus').value,
-        wallet: document.getElementById('fWallet').value.trim(),
-        priority: parseInt(document.getElementById('fPriority').value),
-        amount: document.getElementById('fAmount').value,
-        value: document.getElementById('fValue').value,
-        dateRegistered: document.getElementById('fDateRegistered').value,
-        dateClaimed: document.getElementById('fDateClaimed').value,
-        deadline: document.getElementById('fDeadline').value,
-        link: document.getElementById('fLink').value.trim(),
-        requirements: document.getElementById('fRequirements').value.trim(),
-        notes: document.getElementById('fNotes').value.trim(),
-        createdAt: editId ? airdrops.find(a=>a.id===editId)?.createdAt || Date.now() : Date.now(),
-      };
-
-      // Clear pending logo
-      window._pendingLogoUrl = '';
-
-      if (editId) {
-        const idx = airdrops.findIndex(a => a.id === editId);
-        if (idx >= 0) airdrops[idx] = data;
-      } else {
-        airdrops.push(data);
-      }
-      saveData();
-      render();
-      closeModal();
-    }
-
-    function editAirdrop(id) { openModal(id); }
-
-    function deleteAirdrop(id) {
-      if (confirm('Hapus airdrop ini?')) {
-        airdrops = airdrops.filter(a => a.id !== id);
-        saveData();
-        render();
-      }
-    }
-
-    // ===== Export/Import =====
-    function exportJSON() {
-      const blob = new Blob([JSON.stringify(airdrops, null, 2)], {type: 'application/json'});
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = 'airdrop_backup_' + new Date().toISOString().slice(0,10) + '.json';
-      a.click();
-      URL.revokeObjectURL(url);
-    }
-
-    function importJSON(event) {
-      const file = event.target.files[0];
-      if (!file) return;
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        try {
-          const data = JSON.parse(e.target.result);
-          if (confirm('Restore ' + data.length + ' airdrop? Data saat ini akan ditimpa.')) {
-            airdrops = data;
-            saveData();
-            render();
-          }
-        } catch(err) { alert('File tidak valid: ' + err.message); }
-      };
-      reader.readAsText(file);
-    }
-
-    function exportCSV() {
-      if (airdrops.length === 0) { alert('Tidak ada data untuk diexport'); return; }
-      const headers = ['Project','Token','Status','Wallet','Jumlah','Nilai(USD)','Tgl Daftar','Tgl Klaim','Deadline','Link','Prioritas','Syarat','Catatan'];
-      const rows = airdrops.map(a => [
-        a.project, a.token, a.status, a.wallet, a.amount, a.value,
-        a.dateRegistered, a.dateClaimed, a.deadline, a.link, a.priority, a.requirements, a.notes
-      ].map(v => `"${(v||'').toString().replace(/"/g,'""')}"`).join(','));
-      const csv = headers.join(',') + '\n' + rows.join('\n');
-      const blob = new Blob([csv], {type: 'text/csv'});
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = 'airdrop_tracker_' + new Date().toISOString().slice(0,10) + '.csv';
-      a.click();
-      URL.revokeObjectURL(url);
-    }
-
-    // ===== Init =====
-    loadData();
-    render();
-
-    // Close modals on outside click
-    document.getElementById('modal').addEventListener('click', (e) => {
-      if (e.target.id === 'modal') closeModal();
-    });
-    document.getElementById('importModal').addEventListener('click', (e) => {
-      if (e.target.id === 'importModal') closeImportModal();
-    });
-  </script>
+// ===== INIT =====
+load(); render();
+document.getElementById('addModal').addEventListener('click', e => { if(e.target.id==='addModal') closeAddModal(); });
+</script>
 </body>
 </html>
