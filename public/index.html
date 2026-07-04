@@ -308,7 +308,6 @@
           <th style="width:40px">LOGO</th>
           <th>PROJECT</th>
           <th>COST</th>
-          <th>REWARD DATE</th>
           <th>AIRDROP LINK</th>
           <th>AKSI</th>
         </tr>
@@ -340,7 +339,6 @@
       <input type="hidden" id="fProject">
       <input type="hidden" id="fLogoUrl">
       <input type="hidden" id="fCost">
-      <input type="hidden" id="fRewardDate">
       <input type="hidden" id="fAvailableFrom">
       <input type="hidden" id="editId">
 
@@ -409,15 +407,11 @@ function render() {
 
   // Stats
   const doneCount = airdrops.filter(x => isDone(x.id)).length;
-  const st = {
-    todo: airdrops.filter(x=>x.status==='todo').length
-  };
   document.getElementById('stats').innerHTML = `
     <div class="stat-card"><div class="label">TOTAL</div><div class="value gold">${airdrops.length}</div></div>
     <div class="stat-card"><div class="label">DONE (24J)</div><div class="value green">${doneCount}</div></div>
   `;
 
-  const sm = { todo:'todo' };
   const tbody = document.getElementById('tableBody');
   tbody.innerHTML = f.map(a => {
     const done = isDone(a.id);
@@ -428,7 +422,6 @@ function render() {
         ${a.availableFrom ? `<div style="font-size:11px;color:#7a6a3a">${esc(a.availableFrom)}</div>` : ''}
       </td>
       <td class="badge-cost">${esc(a.cost)||'-'}</td>
-      <td style="color:#7a6a3a">${esc(a.rewardDate)||'-'}</td>
       <td>${a.airdropLink ? `<a href="${esc(a.airdropLink)}" target="_blank" class="airdrop-link">→ BUKA</a>` : '-'}</td>
       <td style="white-space:nowrap">
         <button class="sm" onclick="refreshAirdrop('${a.id}')" title="Refresh dari Cryptorank">⟳</button>
@@ -465,7 +458,7 @@ function editAirdrop(id) {
         ${a.logoUrl ? `<img src="${esc(a.logoUrl)}" alt="">` : ''}
         <div class="info">
           <div class="name">${esc(a.project)}</div>
-          <div class="detail">COST: ${esc(a.cost||'-')} · ${esc(a.rewardDate||'-')}</div>
+          <div class="detail">COST: ${esc(a.cost||'-')}</div>
         </div>
       </div>`
     : '';
@@ -500,15 +493,15 @@ async function fetchFromCR() {
       <div class="info">
         <div class="name">${esc(data.project)}</div>
         <small>${esc(data.rewardType||'')}</small>
-        <div class="detail">COST: ${esc(data.cost||'N/A')} · STATUS: ${esc(data.status||'-')} · DATE: ${esc(data.rewardDate||'TBA')}</div>
+        <div class="detail">COST: ${esc(data.cost||'N/A')} · STATUS: ${esc(data.status||'-')} </div>
       </div>
     </div>`;
 
     document.getElementById('fProject').value = data.project || '';
     document.getElementById('fLogoUrl').value = data.logoUrl || '';
     document.getElementById('fCost').value = data.cost || 'N/A';
-    document.getElementById('fRewardDate').value = data.rewardDate || '';
     document.getElementById('fAvailableFrom').value = data.availableFrom || '';
+    
 
   } catch(e) {
     stEl.innerHTML = `<div class="import-error">❌ ${esc(e.message)}. ISI MANUAL.</div>`;
@@ -528,7 +521,6 @@ function saveAirdrop() {
     project: document.getElementById('fProject').value || cryptorankUrl.match(/drophunting\/([^\/\?-]+)/i)?.[1] || 'UNKNOWN',
     logoUrl: document.getElementById('fLogoUrl').value,
     cost: document.getElementById('fCost').value,
-    rewardDate: document.getElementById('fRewardDate').value,
     availableFrom: document.getElementById('fAvailableFrom')?.value || '',
     cryptorankUrl,
     airdropLink,
@@ -560,7 +552,6 @@ async function refreshAirdrop(id) {
     a.project = data.project || a.project;
     a.logoUrl = data.logoUrl || a.logoUrl;
     a.cost = data.cost || a.cost;
-    a.rewardDate = data.rewardDate || a.rewardDate;
     a.availableFrom = data.availableFrom || '';
     save(); render();
   } catch(e) {

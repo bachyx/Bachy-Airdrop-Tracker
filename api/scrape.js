@@ -31,9 +31,16 @@ module.exports = async (req, res) => {
     const tm = html.match(/<title>([^<]+?)\s*Airdrop/i);
     result.project = tm ? tm[1].trim() : '';
 
-    // Logo: og:image
-    const og = html.match(/<meta[^>]*property="og:image"[^>]*content="([^"]+)"/i);
-    if (og) result.logoUrl = og[1];
+    // Logo: find actual coin image from cryptorank.io/coins/
+    const coinImg = html.match(/<img[^>]*src="(https:\/\/images\.cryptorank\.io\/coins\/[^"]+)"[^>]*>/i);
+    if (coinImg) {
+      result.logoUrl = coinImg[1];
+    }
+    // Fallback: og:image
+    if (!result.logoUrl) {
+      const og = html.match(/<meta[^>]*property="og:image"[^>]*content="([^"]+)"/i);
+      if (og) result.logoUrl = og[1];
+    }
 
     // Cost: find the JSON block that has the matching slug key
     // Looking for: "key":"{slug}","name":"...","cost":N
