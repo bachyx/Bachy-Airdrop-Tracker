@@ -111,6 +111,21 @@
     .controls input { flex:1; min-width:180px; }
     .controls select { min-width:100px; }
 
+
+    /* ===== A-Z FILTER ===== */
+    .az-bar {
+      display:flex; gap:4px; margin-bottom:12px; flex-wrap:wrap;
+      justify-content:center;
+    }
+    .az-btn {
+      font-family:'VT323',monospace; font-size:12px; padding:2px 6px;
+      min-width:28px; text-align:center;
+      border:1px solid #4a3a1a; background:#1a120a; color:#7a6a3a;
+      cursor:pointer; transition:all 0.15s;
+    }
+    .az-btn:hover { border-color:#9b7b1c; color:#d4a017; }
+    .az-btn.az-active { background:#4a3a1a; color:#e8b830; border-color:#e8b830; }
+
     /* ===== TABLE ===== */
     .table-wrap {
       border: 2px solid #4a3a1a;
@@ -292,11 +307,47 @@
       <option value="todo">TODO</option>
       <option value="done">DONE</option>
     </select>
+    <select id="filterTaskType" onchange="render()">
+      <option value="">SEMUA TASK</option>
+<option value="Social">Social</option><option value="Fill The Form">Fill The Form</option><option value="Bounty Platforms">Bounty Platforms</option><option value="Testnet">Testnet</option><option value="Getting a role">Getting a role</option><option value="Trading">Trading</option><option value="Mainnet">Mainnet</option><option value="Liquidity">Liquidity</option><option value="Gaming">Gaming</option><option value="Mint NFT">Mint NFT</option><option value="Ambassador program">Ambassador program</option><option value="Staking">Staking</option><option value="Predictions">Predictions</option><option value="Hold">Hold</option><option value="Node">Node</option><option value="DePIN">DePIN</option><option value="Wallet Airdrop Status">Wallet Airdrop Status</option><option value="Mint Domain">Mint Domain</option><option value="Contract Deployment">Contract Deployment</option>
+    </select>
     <select id="sortBy" onchange="render()">
       <option value="created">TERBARU</option>
       <option value="project">PROJECT</option>
       <option value="cost">COST</option>
     </select>
+  </div>
+
+
+  <!-- A-Z FILTER -->
+  <div class="az-bar" id="azBar">
+    <button class="az-btn az-active" data-letter="" onclick="filterAZ('')">ALL</button>
+    <button class="az-btn" data-letter="A" onclick="filterAZ('A')">A</button>
+    <button class="az-btn" data-letter="B" onclick="filterAZ('B')">B</button>
+    <button class="az-btn" data-letter="C" onclick="filterAZ('C')">C</button>
+    <button class="az-btn" data-letter="D" onclick="filterAZ('D')">D</button>
+    <button class="az-btn" data-letter="E" onclick="filterAZ('E')">E</button>
+    <button class="az-btn" data-letter="F" onclick="filterAZ('F')">F</button>
+    <button class="az-btn" data-letter="G" onclick="filterAZ('G')">G</button>
+    <button class="az-btn" data-letter="H" onclick="filterAZ('H')">H</button>
+    <button class="az-btn" data-letter="I" onclick="filterAZ('I')">I</button>
+    <button class="az-btn" data-letter="J" onclick="filterAZ('J')">J</button>
+    <button class="az-btn" data-letter="K" onclick="filterAZ('K')">K</button>
+    <button class="az-btn" data-letter="L" onclick="filterAZ('L')">L</button>
+    <button class="az-btn" data-letter="M" onclick="filterAZ('M')">M</button>
+    <button class="az-btn" data-letter="N" onclick="filterAZ('N')">N</button>
+    <button class="az-btn" data-letter="O" onclick="filterAZ('O')">O</button>
+    <button class="az-btn" data-letter="P" onclick="filterAZ('P')">P</button>
+    <button class="az-btn" data-letter="Q" onclick="filterAZ('Q')">Q</button>
+    <button class="az-btn" data-letter="R" onclick="filterAZ('R')">R</button>
+    <button class="az-btn" data-letter="S" onclick="filterAZ('S')">S</button>
+    <button class="az-btn" data-letter="T" onclick="filterAZ('T')">T</button>
+    <button class="az-btn" data-letter="U" onclick="filterAZ('U')">U</button>
+    <button class="az-btn" data-letter="V" onclick="filterAZ('V')">V</button>
+    <button class="az-btn" data-letter="W" onclick="filterAZ('W')">W</button>
+    <button class="az-btn" data-letter="X" onclick="filterAZ('X')">X</button>
+    <button class="az-btn" data-letter="Y" onclick="filterAZ('Y')">Y</button>
+    <button class="az-btn" data-letter="Z" onclick="filterAZ('Z')">Z</button>
   </div>
 
   <!-- TABLE -->
@@ -308,6 +359,7 @@
           <th style="width:40px">LOGO</th>
           <th>PROJECT</th>
           <th>COST</th>
+          <th>TASK TYPE</th>
           <th>AIRDROP LINK</th>
           <th>AKSI</th>
         </tr>
@@ -336,6 +388,15 @@
         <input type="url" id="airdropTaskLink" placeholder="https://..." value="">
       </div>
 
+
+      <div class="form-group">
+        <label>TASK TYPE</label>
+        <select id="fTaskType" style="width:100%;font-family:'VT323',monospace;font-size:16px;background:#1a120a;border:2px solid #4a3a1a;color:#d4a017;padding:10px 12px;">
+          <option value="">— PILIH TASK —</option>
+          <option value="Social">Social</option><option value="Fill The Form">Fill The Form</option><option value="Bounty Platforms">Bounty Platforms</option><option value="Testnet">Testnet</option><option value="Getting a role">Getting a role</option><option value="Trading">Trading</option><option value="Mainnet">Mainnet</option><option value="Liquidity">Liquidity</option><option value="Gaming">Gaming</option><option value="Mint NFT">Mint NFT</option><option value="Ambassador program">Ambassador program</option><option value="Staking">Staking</option><option value="Predictions">Predictions</option><option value="Hold">Hold</option><option value="Node">Node</option><option value="DePIN">DePIN</option><option value="Wallet Airdrop Status">Wallet Airdrop Status</option><option value="Mint Domain">Mint Domain</option><option value="Contract Deployment">Contract Deployment</option>
+        </select>
+      </div>
+
       <input type="hidden" id="fProject">
       <input type="hidden" id="fLogoUrl">
       <input type="hidden" id="fCost">
@@ -359,6 +420,15 @@ let airdrops = [];
 // ===== STORAGE =====
 function load() { airdrops = JSON.parse(localStorage.getItem(SK) || '[]'); }
 function save() { localStorage.setItem(SK, JSON.stringify(airdrops)); }
+
+
+// ===== A-Z FILTER =====
+function filterAZ(letter) {
+  document.querySelectorAll('.az-btn').forEach(b => {
+    b.classList.toggle('az-active', b.dataset.letter === letter);
+  });
+  render();
+}
 
 // ===== DONE 24H =====
 function getDone() { return JSON.parse(localStorage.getItem(DK) || '{}'); }
@@ -390,11 +460,15 @@ function toggleTheme() {
 function render() {
   const q = document.getElementById('search').value.toLowerCase();
   const fs = document.getElementById('filterStatus').value;
+  const ft = document.getElementById('filterTaskType').value;
+  const az = document.getElementById('azBar')?.querySelector('.az-active')?.dataset?.letter || '';
   const sb = document.getElementById('sortBy').value;
 
   let f = airdrops.filter(a => {
     if (fs === 'done') return isDone(a.id);
     if (fs === 'todo') return !isDone(a.id);
+    if (az && (a.project||'').charAt(0).toUpperCase() !== az) return false;
+    if (ft && a.taskType !== ft) return false;
     if (q) return (a.project+'').toLowerCase().includes(q);
     return true;
   });
@@ -422,6 +496,7 @@ function render() {
         ${a.availableFrom ? `<div style="font-size:11px;color:#7a6a3a">${esc(a.availableFrom)}</div>` : ''}
       </td>
       <td class="badge-cost">${esc(a.cost)||'-'}</td>
+      <td style="color:#7a6a3a;font-size:13px">${esc(a.taskType)||'-'}</td>
       <td>${a.airdropLink ? `<a href="${esc(a.airdropLink)}" target="_blank" class="airdrop-link">→ BUKA</a>` : '-'}</td>
       <td style="white-space:nowrap">
         <button class="sm" onclick="refreshAirdrop('${a.id}')" title="Refresh dari Cryptorank">⟳</button>
@@ -441,6 +516,7 @@ function openAddModal() {
   document.getElementById('cryptorankUrl').value = '';
   document.getElementById('airdropTaskLink').value = '';
   document.getElementById('importStatus').innerHTML = '';
+  document.getElementById('fTaskType').value = '';
   document.getElementById('addModal').classList.add('active');
   document.getElementById('addModal').querySelector('h2').textContent = '+ TAMBAH AIRDROP';
 }
@@ -453,6 +529,7 @@ function editAirdrop(id) {
   document.getElementById('editId').value = id;
   document.getElementById('cryptorankUrl').value = a.cryptorankUrl || '';
   document.getElementById('airdropTaskLink').value = a.airdropLink || '';
+  document.getElementById('fTaskType').value = a.taskType || '';
   document.getElementById('importStatus').innerHTML = a.logoUrl
     ? `<div class="import-preview-card">
         ${a.logoUrl ? `<img src="${esc(a.logoUrl)}" alt="">` : ''}
@@ -493,7 +570,7 @@ async function fetchFromCR() {
       <div class="info">
         <div class="name">${esc(data.project)}</div>
         <small>${esc(data.rewardType||'')}</small>
-        <div class="detail">COST: ${esc(data.cost||'N/A')} · STATUS: ${esc(data.status||'-')} </div>
+        <div class="detail">COST: ${esc(data.cost||'N/A')}</div>
       </div>
     </div>`;
 
@@ -519,6 +596,7 @@ function saveAirdrop() {
   const data = {
     id: editId || ('a'+Date.now()+Math.random().toString(36).slice(2,6)),
     project: document.getElementById('fProject').value || cryptorankUrl.match(/drophunting\/([^\/\?-]+)/i)?.[1] || 'UNKNOWN',
+    taskType: document.getElementById('fTaskType').value,
     logoUrl: document.getElementById('fLogoUrl').value,
     cost: document.getElementById('fCost').value,
     availableFrom: document.getElementById('fAvailableFrom')?.value || '',
@@ -553,6 +631,7 @@ async function refreshAirdrop(id) {
     a.logoUrl = data.logoUrl || a.logoUrl;
     a.cost = data.cost || a.cost;
     a.availableFrom = data.availableFrom || '';
+    a.taskType = data.taskType || a.taskType;
     save(); render();
   } catch(e) {
     alert('GAGAL REFRESH: ' + e.message);
