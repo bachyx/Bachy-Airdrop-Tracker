@@ -71,24 +71,24 @@ module.exports = async (req, res) => {
       result.cost = rm ? '$ ' + rm[1].trim() : 'N/A';
     }
 
-    // Task Types from embedded JSON
-    // Find "key":"{slug}" position, then search nearby for taskTypes
-    const keyPattern = '"key":"' + slugEscaped + '"';
-    const keyIdx = html.indexOf(keyPattern);
-    if (keyIdx >= 0) {
-      const nearby = html.substring(keyIdx, keyIdx + 800);
-      const ttNear = nearby.match(/"taskTypes"\s*:\s*\[([^\]]+)\]/i);
-      if (ttNear) {
-        const types = ttNear[1].replace(/"/g, '').split(',').map(s => s.trim()).filter(Boolean);
-        if (types.length > 0) result.taskType = types[0];
-      }
+    // Task Types from __NEXT_DATA__ JSON (most reliable)
+    const nextDataMatch = html.match(/__NEXT_DATA__" type="application\/json">([^<]+)<\/script>/);
+    if (nextDataMatch) {
+      try {
+        const nextData = JSON.parse(nextDataMatch[1]);
+        const activity = nextData?.props?.pageProps?.drophuntingActivity;
+        if (activity?.tasks?.length > 0) {
+          result.taskType = activity.tasks[0].type || activity.tasks[0].types?.[0] || '';
+        }
+      } catch(e) { /* ignore parse errors */ }
     }
-    // Fallback: try activity card name from popular activities section
+
+    // Fallback: meta description
     if (!result.taskType) {
-      const cardMatch = html.match(new RegExp('drophunting\\/' + slugEscaped + '[^<]*class[^>]*button[^>]*>([^<]+)', 'i'));
-      if (cardMatch) {
-        const txt = cardMatch[1].trim();
-        if (txt.length < 60) result.taskType = txt;
+      const descMatch = html.match(/Available tasks:\s*([^.<]+)/i);
+      if (descMatch) {
+        const tasks = descMatch[1].split(',').map(s => s.trim()).filter(Boolean);
+        if (tasks.length > 0) result.taskType = tasks[0];
       }
     }
 
