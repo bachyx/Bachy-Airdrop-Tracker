@@ -270,7 +270,7 @@
 
   <header>
     <h1>BACHY AIRDROP TRACKER</h1>
-    <div class="subtitle">CRYPTORANK DROPHUNTING MONITOR</div>
+    <div class="subtitle">DROPHUNTING MONITOR</div>
     <div class="header-actions">
       <button onclick="toggleTheme()" id="themeBtn">☾ DARK</button>
       <button onclick="exportCSV()">EXPORT CSV</button>
@@ -290,9 +290,7 @@
     <select id="filterStatus" onchange="render()">
       <option value="">SEMUA</option>
       <option value="todo">TODO</option>
-      <option value="ongoing">BERJALAN</option>
-      <option value="claimed">CLAIMED</option>
-      <option value="missed">MISSED</option>
+      <option value="done">DONE</option>
     </select>
     <select id="sortBy" onchange="render()">
       <option value="created">TERBARU</option>
@@ -407,6 +405,7 @@ function render() {
   const sb = document.getElementById('sortBy').value;
 
   let f = airdrops.filter(a => {
+    if (fs === 'done') return isDone(a.id);
     if (fs && a.status!==fs) return false;
     if (q) return (a.project+'').toLowerCase().includes(q);
     return true;
@@ -419,18 +418,14 @@ function render() {
   });
 
   // Stats
+  const doneCount = airdrops.filter(x => isDone(x.id)).length;
   const st = {
-    todo: airdrops.filter(x=>x.status==='todo').length,
-    ongoing: airdrops.filter(x=>x.status==='ongoing').length,
-    claimed: airdrops.filter(x=>x.status==='claimed').length,
-    missed: airdrops.filter(x=>x.status==='missed').length
+    todo: airdrops.filter(x=>x.status==='todo').length
   };
   document.getElementById('stats').innerHTML = `
     <div class="stat-card"><div class="label">TOTAL</div><div class="value gold">${airdrops.length}</div></div>
     <div class="stat-card"><div class="label">TODO</div><div class="value blue">${st.todo}</div></div>
-    <div class="stat-card"><div class="label">BERJALAN</div><div class="value yellow">${st.ongoing}</div></div>
-    <div class="stat-card"><div class="label">CLAIMED</div><div class="value green">${st.claimed}</div></div>
-    <div class="stat-card"><div class="label">MISSED</div><div class="value red">${st.missed}</div></div>
+    <div class="stat-card"><div class="label">DONE (24J)</div><div class="value green">${doneCount}</div></div>
   `;
 
   const sm = { todo:'todo', ongoing:'ongoing', claimed:'claimed', missed:'missed' };
@@ -457,7 +452,7 @@ function render() {
   document.getElementById('empty').style.display = f.length===0?'block':'none';
 }
 
-function esc(s) { return (s||'').replace(/[<>&"]/g,c=>({'<':'<,'>':'>','&':'&','"':'"'}[c])); }
+function esc(s) { return (s||'').replace(/[<>&"]/g,c=>({'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;'}[c])); }
 
 // ===== MODAL =====
 function openAddModal() {
