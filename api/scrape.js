@@ -71,6 +71,19 @@ module.exports = async (req, res) => {
       result.cost = rm ? '$ ' + rm[1].trim() : 'N/A';
     }
 
+    // Task Types from embedded JSON
+    const ttRegex = new RegExp('"key"\\s*:\\s*"' + slugEscaped + '"[^}]*?"taskTypes"\\s*:\\s*\\[([^\\]]+)\\]', 'i');
+    const ttMatch = html.match(ttRegex);
+    if (ttMatch) {
+      const types = ttMatch[1].replace(/"/g, '').split(',').map(s => s.trim()).filter(Boolean);
+      if (types.length > 0) result.taskType = types[0]; // Use first task type
+    }
+    // Fallback: look for activity card with matching href
+    if (!result.taskType) {
+      const cardMatch = html.match(new RegExp('drophunting\\/' + slugEscaped + '[^<]*<[^<]*<[^>]*>([^<]+?)\\s*<', 'i'));
+      if (cardMatch) result.taskType = cardMatch[1].trim();
+    }
+
     // Reward Type
     const rt = html.match(/Reward\s*Type[^:]*:?\s*([^<]{2,40})</i);
     result.rewardType = rt ? rt[1].trim() : '';
