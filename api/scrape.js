@@ -72,16 +72,24 @@ module.exports = async (req, res) => {
     }
 
     // Task Types from embedded JSON
-    const ttRegex = new RegExp('"key"\\s*:\\s*"' + slugEscaped + '"[^}]*?"taskTypes"\\s*:\\s*\\[([^\\]]+)\\]', 'i');
-    const ttMatch = html.match(ttRegex);
-    if (ttMatch) {
-      const types = ttMatch[1].replace(/"/g, '').split(',').map(s => s.trim()).filter(Boolean);
-      if (types.length > 0) result.taskType = types[0]; // Use first task type
+    // Find "key":"{slug}" position, then search nearby for taskTypes
+    const keyPattern = '"key":"' + slugEscaped + '"';
+    const keyIdx = html.indexOf(keyPattern);
+    if (keyIdx >= 0) {
+      const nearby = html.substring(keyIdx, keyIdx + 800);
+      const ttNear = nearby.match(/"taskTypes"\s*:\s*\[([^\]]+)\]/i);
+      if (ttNear) {
+        const types = ttNear[1].replace(/"/g, '').split(',').map(s => s.trim()).filter(Boolean);
+        if (types.length > 0) result.taskType = types[0];
+      }
     }
-    // Fallback: look for activity card with matching href
+    // Fallback: try activity card name from popular activities section
     if (!result.taskType) {
-      const cardMatch = html.match(new RegExp('drophunting\\/' + slugEscaped + '[^<]*<[^<]*<[^>]*>([^<]+?)\\s*<', 'i'));
-      if (cardMatch) result.taskType = cardMatch[1].trim();
+      const cardMatch = html.match(new RegExp('drophunting\\/' + slugEscaped + '[^<]*class[^>]*button[^>]*>([^<]+)', 'i'));
+      if (cardMatch) {
+        const txt = cardMatch[1].trim();
+        if (txt.length < 60) result.taskType = txt;
+      }
     }
 
     // Reward Type
