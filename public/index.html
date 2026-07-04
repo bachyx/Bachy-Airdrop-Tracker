@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>🪂 Airdrop Tracker</title>
+  <style>
+    :root {
+      --bg: #0a0e1a;
+      --card: #131929;
+      --border: #1f2940;
+      --text: #e2e8f0;
+      --muted: #64748b;
+      --accent: #3b82f6;
+      --green: #10b981;
+      --yellow: #f59e0b;
+      --red: #ef4444;
+      --blue: #3b82f6;
+    }
+
+    [data-theme="light"] {
+      --bg: #f1f5f9;
+      --card: #ffffff;
+      --border: #e2e8f0;
+      --text: #1e293b;
+      --muted: #94a3b8;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      transition: background 0.3s, color 0.3s;
+    }
+
+    .container { max-width: 1200px; margin: 0 auto; padding: 20px; }
+
+    header {
+      display: flex; justify-content: space-between; align-items: center;
+      margin-bottom: 24px; flex-wrap: wrap; gap: 12px;
+    }
+
+    h1 { font-size: 28px; }
+
+    .header-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+
+    /* Stats */
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 12px; margin-bottom: 24px;
+    }
+    .stat-card {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: 12px; padding: 16px;
+    }
+    .stat-label { font-size: 12px; color: var(--muted); text-transform: uppercase; }
+    .stat-value { font-size: 28px; font-weight: 700; margin-top: 4px; }
+    .stat-value.green { color: var(--green); }
+    .stat-value.yellow { color: var(--yellow); }
+    .stat-value.red { color: var(--red); }
+    .stat-value.blue { color: var(--blue); }
+
+    /* Controls */
+    .controls {
+      display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap;
+    }
+    .controls input, .controls select {
+      background: var(--card); border: 1px solid var(--border);
+      color: var(--text); padding: 8px 12px; border-radius: 8px;
+      font-size: 14px;
+    }
+    .controls input { flex: 1; min-width: 200px; }
+
+    /* Buttons */
+    button {
+      background: var(--accent); color: white; border: none;
+      padding: 8px 16px; border-radius: 8px; cursor: pointer;
+      font-size: 14px; font-weight: 500; transition: opacity 0.2s;
+    }
+    button:hover { opacity: 0.9; }
+    button.secondary { background: var(--card); border: 1px solid var(--border); color: var(--text); }
+    button.danger { background: var(--red); }
+    button.sm { padding: 4px 10px; font-size: 12px; }
+    button.icon { padding: 4px 8px; }
+
+    /* Table */
+    .table-wrap {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: 12px; overflow-x: auto;
+    }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { padding: 12px; text-align: left; border-bottom: 1px solid var(--border); font-size: 14px; }
+    th { color: var(--muted); font-weight: 600; font-size: 12px; text-transform: uppercase; }
+    tr:last-child td { border-bottom: none; }
+    tr:hover { background: rgba(255,255,255,0.03); }
+
+    /* Status badges */
+    .badge {
+      padding: 2px 8px; border-radius: 999px; font-size: 12px; font-weight: 500;
+    }
+    .badge.claimed { background: rgba(16,185,129,0.15); color: var(--green); }
+    .badge.ongoing { background: rgba(245,158,11,0.15); color: var(--yellow); }
+    .badge.todo { background: rgba(59,130,246,0.15); color: var(--blue); }
+    .badge.missed { background: rgba(239,68,68,0.15); color: var(--red); }
+
+    .priority { font-size: 14px; }
+    .link { color: var(--accent); text-decoration: none; }
+    .link:hover { text-decoration: underline; }
+
+    /* Modal */
+    .modal-overlay {
+      position: fixed; inset: 0; background: rgba(0,0,0,0.6);
+      display: none; align-items: center; justify-content: center; z-index: 100;
+      padding: 20px;
+    }
+    .modal-overlay.active { display: flex; }
+    .modal {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: 16px; padding: 24px; width: 100%; max-width: 500px;
+      max-height: 90vh; overflow-y: auto;
+    }
+    .modal h2 { margin-bottom: 16px; }
+    .form-group { margin-bottom: 12px; }
+    .form-group label { display: block; font-size: 12px; color: var(--muted); margin-bottom: 4px; }
+    .form-group input, .form-group select, .form-group textarea {
+      width: 100%; background: var(--bg); border: 1px solid var(--border);
+      color: var(--text); padding: 8px 12px; border-radius: 8px; font-size: 14px;
+    }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .modal-actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 16px; }
+
+    .empty { text-align: center; padding: 40px; color: var(--muted); }
+
+    @media (max-width: 640px) {
+      .form-row { grid-template-columns: 1fr; }
+      th, td { font-size: 12px; padding: 8px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>🪂 Airdrop Tracker</h1>
+      <div class="header-actions">
+        <button class="secondary icon" onclick="toggleTheme()" id="themeBtn">🌙</button>
+        <button class="secondary" onclick="exportCSV()">Export CSV</button>
+        <button class="secondary" onclick="exportJSON()">Backup</button>
+        <button class="secondary" onclick="document.getElementById('importFile').click()">Restore</button>
+        <input type="file" id="importFile" accept=".json" style="display:none" onchange="importJSON(event)">
+        <button onclick="openModal()">+ Tambah Airdrop</button>
+      </div>
+    </header>
+
+    <!-- Stats -->
+    <div class="stats" id="stats"></div>
+
+    <!-- Controls -->
+    <div class="controls">
+      <input type="text" id="search" placeholder="🔍 Cari project, token, wallet..." oninput="render()">
+      <select id="filterStatus" onchange="render()">
+        <option value="">Semua Status</option>
+        <option value="claimed">✅ Sudah Klaim</option>
+        <option value="ongoing">⏳ Sedang Berjalan</option>
+        <option value="todo">📋 Belum Dikerjakan</option>
+        <option value="missed">❌ Expired/Missed</option>
+      </select>
+      <select id="filterPriority" onchange="render()">
+        <option value="">Semua Prioritas</option>
+        <option value="3">⭐⭐⭐ Tinggi</option>
+        <option value="2">⭐⭐ Sedang</option>
+        <option value="1">⭐ Rendah</option>
+      </select>
+      <select id="sortBy" onchange="render()">
+        <option value="created">Sort: Terbaru</option>
+        <option value="deadline">Sort: Deadline</option>
+        <option value="project">Sort: Nama Project</option>
+        <option value="value">Sort: Nilai (USD)</option>
+      </select>
+    </div>
+
+    <!-- Table -->
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Project</th>
+            <th>Token</th>
+            <th>Status</th>
+            <th>Wallet</th>
+            <th>Jumlah</th>
+            <th>Nilai (USD)</th>
+            <th>Deadline</th>
+            <th>Link</th>
+            <th>Prioritas</th>
+            <th>Catatan</th>
+            <th>Aksi</th>
+          </tr>
+        </thead>
+        <tbody id="tableBody"></tbody>
+      </table>
+    </div>
+    <div class="empty" id="empty" style="display:none">
+      Belum ada airdrop. Klik "+ Tambah Airdrop" untuk mulai tracking.
+    </div>
+  </div>
+
+  <!-- Modal -->
+  <div class="modal-overlay" id="modal">
+    <div class="modal">
+      <h2 id="modalTitle">Tambah Airdrop</h2>
+      <input type="hidden" id="editId">
+      <div class="form-group">
+        <label>Nama Project *</label>
+        <input type="text" id="fProject" placeholder="Contoh: Arbitrum, zkSync, LayerZero">
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Token / Ticker</label>
+          <input type="text" id="fToken" placeholder="Contoh: ARB, ZK, ZRO">
+        </div>
+        <div class="form-group">
+          <label>Status *</label>
+          <select id="fStatus">
+            <option value="todo">📋 Belum Dikerjakan</option>
+            <option value="ongoing">⏳ Sedang Berjalan</option>
+            <option value="claimed">✅ Sudah Klaim</option>
+            <option value="missed">❌ Expired/Missed</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Wallet (Label)</label>
+          <input type="text" id="fWallet" placeholder="Contoh: Metamask A, Backpack, Leap">
+        </div>
+        <div class="form-group">
+          <label>Prioritas</label>
+          <select id="fPriority">
+            <option value="3">⭐⭐⭐ Tinggi</option>
+            <option value="2">⭐⭐ Sedang</option>
+            <option value="1">⭐ Rendah</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Jumlah Token</label>
+          <input type="number" id="fAmount" placeholder="0" step="any">
+        </div>
+        <div class="form-group">
+          <label>Nilai (USD)</label>
+          <input type="number" id="fValue" placeholder="0" step="any">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Tanggal Daftar</label>
+          <input type="date" id="fDateRegistered">
+        </div>
+        <div class="form-group">
+          <label>Tanggal Klaim</label>
+          <input type="date" id="fDateClaimed">
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Deadline</label>
+        <input type="date" id="fDeadline">
+      </div>
+      <div class="form-group">
+        <label>Link</label>
+        <input type="url" id="fLink" placeholder="https://...">
+      </div>
+      <div class="form-group">
+        <label>Syarat / Cara Klaim</label>
+        <input type="text" id="fRequirements" placeholder="Contoh: Bridge 5x, Swap, dll">
+      </div>
+      <div class="form-group">
+        <label>Catatan</label>
+        <textarea id="fNotes" rows="2" placeholder="Catatan tambahan..."></textarea>
+      </div>
+      <div class="modal-actions">
+        <button class="secondary" onclick="closeModal()">Batal</button>
+        <button onclick="saveAirdrop()">Simpan</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const STORAGE_KEY = 'airdrop_tracker_data';
+    let airdrops = [];
+    let editId = null;
+
+    // ===== Load/Save =====
+    function loadData() {
+      const data = localStorage.getItem(STORAGE_KEY);
+      airdrops = data ? JSON.parse(data) : [];
+    }
+    function saveData() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(airdrops));
+    }
+
+    // ===== Theme =====
+    function toggleTheme() {
+      const current = document.documentElement.getAttribute('data-theme') || 'dark';
+      const next = current === 'dark' ? 'light' : 'dark';
+      document.documentElement.setAttribute('data-theme', next);
+      localStorage.setItem('airdrop_theme', next);
+      document.getElementById('themeBtn').textContent = next === 'dark' ? '🌙' : '☀️';
+    }
+    (function() {
+      const theme = localStorage.getItem('airdrop_theme') || 'dark';
+      document.documentElement.setAttribute('data-theme', theme);
+      document.getElementById('themeBtn').textContent = theme === 'dark' ? '🌙' : '☀️';
+    })();
+
+    // ===== Stats =====
+    function renderStats() {
+      const stats = {
+        claimed: airdrops.filter(a => a.status === 'claimed').length,
+        ongoing: airdrops.filter(a => a.status === 'ongoing').length,
+        todo: airdrops.filter(a => a.status === 'todo').length,
+        missed: airdrops.filter(a => a.status === 'missed').length,
+      };
+      const totalValue = airdrops
+        .filter(a => a.status === 'claimed')
+        .reduce((sum, a) => sum + (parseFloat(a.value) || 0), 0);
+
+      document.getElementById('stats').innerHTML = `
+        <div class="stat-card">
+          <div class="stat-label">✅ Sudah Klaim</div>
+          <div class="stat-value green">${stats.claimed}</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">⏳ Sedang Berjalan</div>
+          <div class="stat-value yellow">${stats.ongoing}</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">📋 Belum Dikerjakan</div>
+          <div class="stat-value blue">${stats.todo}</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">❌ Missed</div>
+          <div class="stat-value red">${stats.missed}</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">💰 Total Nilai Klaim</div>
+          <div class="stat-value green">$${totalValue.toFixed(2)}</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">📊 Total Airdrop</div>
+          <div class="stat-value">${airdrops.length}</div>
+        </div>
+      `;
+    }
+
+    // ===== Render Table =====
+    function render() {
+      const search = document.getElementById('search').value.toLowerCase();
+      const filterStatus = document.getElementById('filterStatus').value;
+      const filterPriority = document.getElementById('filterPriority').value;
+      const sortBy = document.getElementById('sortBy').value;
+
+      let filtered = airdrops.filter(a => {
+        if (filterStatus && a.status !== filterStatus) return false;
+        if (filterPriority && a.priority !== parseInt(filterPriority)) return false;
+        if (search) {
+          const text = (a.project + ' ' + a.token + ' ' + a.wallet + ' ' + (a.notes||'')).toLowerCase();
+          if (!text.includes(search)) return false;
+        }
+        return true;
+      });
+
+      // Sort
+      filtered.sort((a, b) => {
+        switch(sortBy) {
+          case 'deadline':
+            return (a.deadline || '9999').localeCompare(b.deadline || '9999');
+          case 'project':
+            return (a.project||'').localeCompare(b.project||'');
+          case 'value':
+            return (parseFloat(b.value)||0) - (parseFloat(a.value)||0);
+          default:
+            return b.createdAt - a.createdAt;
+        }
+      });
+
+      const statusMap = {
+        claimed: { label: '✅ Sudah Klaim', class: 'claimed' },
+        ongoing: { label: '⏳ Berjalan', class: 'ongoing' },
+        todo: { label: '📋 Todo', class: 'todo' },
+        missed: { label: '❌ Missed', class: 'missed' },
+      };
+
+      const priorityMap = { 3:'⭐⭐⭐', 2:'⭐⭐', 1:'⭐' };
+
+      const tbody = document.getElementById('tableBody');
+      tbody.innerHTML = filtered.map(a => `
+        <tr>
+          <td><strong>${esc(a.project)}</strong></td>
+          <td>${esc(a.token) || '-'}</td>
+          <td><span class="badge ${statusMap[a.status].class}">${statusMap[a.status].label}</span></td>
+          <td>${esc(a.wallet) || '-'}</td>
+          <td>${a.amount || '-'}</td>
+          <td>${a.value ? '$' + parseFloat(a.value).toFixed(2) : '-'}</td>
+          <td>${a.deadline || '-'}</td>
+          <td>${a.link ? `<a href="${esc(a.link)}" target="_blank" class="link">Link</a>` : '-'}</td>
+          <td class="priority">${priorityMap[a.priority] || '-'}</td>
+          <td>${esc(a.notes) || '-'}</td>
+          <td>
+            <button class="secondary sm" onclick="editAirdrop('${a.id}')">Edit</button>
+            <button class="danger sm" onclick="deleteAirdrop('${a.id}')">Hapus</button>
+          </td>
+        </tr>
+      `).join('');
+
+      document.getElementById('empty').style.display = filtered.length === 0 ? 'block' : 'none';
+      renderStats();
+    }
+
+    function esc(s) { return (s||'').replace(/[<>&"]/g, c=>({'<':'<','>':'>','&':'&','"':'"'}[c])); }
+
+    // ===== Modal =====
+    function openModal(id) {
+      editId = id || null;
+      document.getElementById('modalTitle').textContent = id ? 'Edit Airdrop' : 'Tambah Airdrop';
+      document.getElementById('editId').value = id || '';
+
+      if (id) {
+        const a = airdrops.find(x => x.id === id);
+        if (a) {
+          document.getElementById('fProject').value = a.project || '';
+          document.getElementById('fToken').value = a.token || '';
+          document.getElementById('fStatus').value = a.status || 'todo';
+          document.getElementById('fWallet').value = a.wallet || '';
+          document.getElementById('fPriority').value = a.priority || 2;
+          document.getElementById('fAmount').value = a.amount || '';
+          document.getElementById('fValue').value = a.value || '';
+          document.getElementById('fDateRegistered').value = a.dateRegistered || '';
+          document.getElementById('fDateClaimed').value = a.dateClaimed || '';
+          document.getElementById('fDeadline').value = a.deadline || '';
+          document.getElementById('fLink').value = a.link || '';
+          document.getElementById('fRequirements').value = a.requirements || '';
+          document.getElementById('fNotes').value = a.notes || '';
+        }
+      } else {
+        document.querySelectorAll('.modal input, .modal select, .modal textarea').forEach(el => el.value = '');
+        document.getElementById('fStatus').value = 'todo';
+        document.getElementById('fPriority').value = '2';
+      }
+      document.getElementById('modal').classList.add('active');
+    }
+    function closeModal() {
+      document.getElementById('modal').classList.remove('active');
+    }
+
+    function saveAirdrop() {
+      const project = document.getElementById('fProject').value.trim();
+      if (!project) { alert('Nama project wajib diisi'); return; }
+
+      const data = {
+        id: editId || ('a' + Date.now() + Math.random().toString(36).slice(2,7)),
+        project,
+        token: document.getElementById('fToken').value.trim(),
+        status: document.getElementById('fStatus').value,
+        wallet: document.getElementById('fWallet').value.trim(),
+        priority: parseInt(document.getElementById('fPriority').value),
+        amount: document.getElementById('fAmount').value,
+        value: document.getElementById('fValue').value,
+        dateRegistered: document.getElementById('fDateRegistered').value,
+        dateClaimed: document.getElementById('fDateClaimed').value,
+        deadline: document.getElementById('fDeadline').value,
+        link: document.getElementById('fLink').value.trim(),
+        requirements: document.getElementById('fRequirements').value.trim(),
+        notes: document.getElementById('fNotes').value.trim(),
+        createdAt: editId ? airdrops.find(a=>a.id===editId)?.createdAt || Date.now() : Date.now(),
+      };
+
+      if (editId) {
+        const idx = airdrops.findIndex(a => a.id === editId);
+        if (idx >= 0) airdrops[idx] = data;
+      } else {
+        airdrops.push(data);
+      }
+      saveData();
+      render();
+      closeModal();
+    }
+
+    function editAirdrop(id) { openModal(id); }
+
+    function deleteAirdrop(id) {
+      if (confirm('Hapus airdrop ini?')) {
+        airdrops = airdrops.filter(a => a.id !== id);
+        saveData();
+        render();
+      }
+    }
+
+    // ===== Export/Import =====
+    function exportJSON() {
+      const blob = new Blob([JSON.stringify(airdrops, null, 2)], {type: 'application/json'});
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'airdrop_backup_' + new Date().toISOString().slice(0,10) + '.json';
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+
+    function importJSON(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        try {
+          const data = JSON.parse(e.target.result);
+          if (confirm('Restore ' + data.length + ' airdrop? Data saat ini akan ditimpa.')) {
+            airdrops = data;
+            saveData();
+            render();
+          }
+        } catch(err) { alert('File tidak valid: ' + err.message); }
+      };
+      reader.readAsText(file);
+    }
+
+    function exportCSV() {
+      if (airdrops.length === 0) { alert('Tidak ada data untuk diexport'); return; }
+      const headers = ['Project','Token','Status','Wallet','Jumlah','Nilai(USD)','Tgl Daftar','Tgl Klaim','Deadline','Link','Prioritas','Syarat','Catatan'];
+      const rows = airdrops.map(a => [
+        a.project, a.token, a.status, a.wallet, a.amount, a.value,
+        a.dateRegistered, a.dateClaimed, a.deadline, a.link, a.priority, a.requirements, a.notes
+      ].map(v => `"${(v||'').toString().replace(/"/g,'""')}"`).join(','));
+      const csv = headers.join(',') + '\n' + rows.join('\n');
+      const blob = new Blob([csv], {type: 'text/csv'});
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'airdrop_tracker_' + new Date().toISOString().slice(0,10) + '.csv';
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+
+    // ===== Init =====
+    loadData();
+    render();
+
+    // Close modal on outside click
+    document.getElementById('modal').addEventListener('click', (e) => {
+      if (e.target.id === 'modal') closeModal();
+    });
+  </script>
+</body>
+</html>
