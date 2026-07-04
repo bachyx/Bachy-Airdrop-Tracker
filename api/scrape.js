@@ -1,5 +1,6 @@
 // Vercel Serverless — Scrape Cryptorank for project logo, cost, status, reward type
 const https = require('https');
+const urlMod = require('url');
 
 function fetchHTML(url) {
   return new Promise((resolve, reject) => {
@@ -23,6 +24,8 @@ module.exports = async (req, res) => {
   try {
     const html = await fetchHTML(url);
     const result = {};
+    const pathParts = url.split('/');
+    const slug = pathParts[pathParts.length - 1].split('?')[0]; // e.g. "world-xyz-activity1230"
 
     // Title -> project name
     const tm = html.match(/<title>([^<]+?)\s*Airdrop/i);
@@ -32,14 +35,33 @@ module.exports = async (req, res) => {
     const og = html.match(/<meta[^>]*property="og:image"[^>]*content="([^"]+)"/i);
     if (og) result.logoUrl = og[1];
 
-    // Try embedded JSON data with cost
-    const jm = html.match(/"(?:key|name)":"([^"]+)"[^}]*?cost[":]+(\d+)/i);
-    if (!jm) {
-      // broader: find any "cost":N block
-      const cm = html.match(/"cost"\s*:\s*(\d+)/);
-      if (cm) result.cost = '$ ' + cm[1];
-    } else {
-      result.cost = '$ ' + jm[2];
+    // Cost: find the JSON block that has the matching slug key
+    // Looking for: "key":"{slug}","name":"...","cost":N
+    const slugEscaped = slug.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const costRegex = new RegExp('"key"\\s*:\\s*"' + slugEscaped + '"[^}]*?"cost"\\s*:\\s*(\\d+)', 'i');
+    const costMatch = html.match(costRegex);
+    if (costMatch) {
+      result.cost = '$ ' + costMatch[1];
+    }
+
+    // Fallback: try broad cost match from the activity list JSON
+    if (!result.cost) {
+      const allCosts = html.match(/"cost"\s*:\s*(\d+)/g);
+      if (allCosts && allCosts.length > 0) {
+        // Try to find which one is ours by proximity to our slug
+        const idx = html.indexOf(`"${slug}"`);
+        if (idx > 0) {
+          const before = html.substring(Math.max(0, idx - 500), idx + 500);
+          const nearCost = before.match(/"cost"\s*:\s*(\d+)/);
+          if (nearCost) result.cost = '$ ' + nearCost[1];
+        }
+      }
+    }
+
+    if (!result.cost) {
+      // Last resort: raised amount
+      const rm = html.match(/Raised[^$]*\$([^<]+)/i);
+      result.cost = rm ? '$ ' + rm[1].trim() : 'N/A';
     }
 
     // Reward Type
@@ -49,7 +71,6 @@ module.exports = async (req, res) => {
     // Status from info card
     const st = html.match(/Status[^:]*:?\s*([A-Za-z]+)</i);
     result.status = st ? st[1].trim() : '';
-    // fallback from icon alt
     if (!result.status) {
       const simg = html.match(/<img[^>]*alt="(Confirmed|Ended|Ongoing|Active|Upcoming)"/i);
       if (simg) result.status = simg[1];
@@ -59,14 +80,11 @@ module.exports = async (req, res) => {
     const rd = html.match(/Reward\s*Date[^:]*:?\s*([^<]{2,30})</i);
     result.rewardDate = rd ? rd[1].trim() : '';
 
-    // Raised (if no cost found)
-    if (!result.cost) {
-      const rm = html.match(/Raised[^$]*\$([^<]+)/i);
-      if (rm) result.cost = '$ ' + rm[1].trim();
-    }
-    result.cost = result.cost || 'N/A';
+    // Deadline / Available from
+    const avail = html.match(/Available from[^<]*<[^>]*>([^<]+)/i);
+    if (avail) result.availableFrom = avail[1].trim();
 
-    if (!result.project && !result.rewardType)
+    if (!result.project)
       return res.status(404).json({ error: 'Could not parse airdrop data' });
 
     res.setHeader('Cache-Control', 's-maxage=3600');
